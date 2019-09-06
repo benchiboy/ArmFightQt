@@ -1,0 +1,54 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>GButton.qml</file>
+        <file>image/background.png</file>
+        <file>image/bomb-action.png</file>
+        <file>image/bomb-idle.png</file>
+        <file>image/bomb.png</file>
+        <file>image/button-help.png</file>
+        <file>image/button-play.png</file>
+        <file>image/catch-action.png</file>
+        <file>image/catch.png</file>
+        <file>image/cloud.png</file>
+        <file>image/currency.png</file>
+        <file>image/dialog-bomb.png</file>
+        <file>image/dialog-factory.png</file>
+        <file>image/dialog-melee.png</file>
+        <file>image/dialog-pointer.png</file>
+        <file>image/dialog-shooter.png</file>
+        <file>image/dialog.png</file>
+        <file>image/factory-action.png</file>
+        <file>image/factory-idle.png</file>
+        <file>image/factory.png</file>
+        <file>image/grid.png</file>
+        <file>image/help.png</file>
+        <file>image/lifes.png</file>
+        <file>image/logo-bubble.png</file>
+        <file>image/logo-fish.png</file>
+        <file>image/logo.png</file>
+        <file>image/melee-action.png</file>
+        <file>image/melee-idle.png</file>
+        <file>image/melee.png</file>
+        <file>image/mob-idle.png</file>
+        <file>image/mob.png</file>
+        <file>image/points.png</file>
+        <file>image/projectile-action.png</file>
+        <file>image/projectile.png</file>
+        <file>image/scores.png</file>
+        <file>image/shooter-action.png</file>
+        <file>image/shooter-idle.png</file>
+        <file>image/shooter.png</file>
+        <file>image/sunlight.png</file>
+        <file>image/text-1.png</file>
+        <file>image/text-2.png</file>
+        <file>image/text-3.png</file>
+        <file>image/text-blank.png</file>
+        <file>image/text-gameover.png</file>
+        <file>image/text-go.png</file>
+        <file>image/wave.png</file>
+        <file>main.cpp</file>
+    </qresource>
+    <qresource prefix="/componet"/>
+</RCC>
