@@ -87,19 +87,19 @@ ApplicationWindow {
         }
     }
 
-    function reqPlay(){
+    function reqPlay(fromId,toId){
         console.log("reqPlay....")
         command.type=req_play
-        command.id="tim"
+        command.fromid=fromId
         command.messge=cardName
-        command.toid=toid
+        command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
 
     function reqPlayOK(){
         console.log("reqPlayOK....")
         command.type=req_playok
-        command.id="tim"
+        command.fromid="tim"
         command.messge=cardName
         command.toid=toid
         socket.sendTextMessage(JSON.stringify(command))
@@ -225,6 +225,8 @@ ApplicationWindow {
                     onClicked: {
                         console.log("list view index===", index,playerModel.get(index).nickName)
                         userlist_id.visible=false
+
+
                     }
                }
                model: PlayerModel {
