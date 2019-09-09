@@ -11,19 +11,33 @@ ApplicationWindow {
     title: qsTr("Stack")
     SystemPalette { id: activePalette }
 
+    property  int  sign_in: 1
+    property  int  play_card: 2
+    property  int  send_msg: 3
+    property  int  get_users: 4
+    property  int  req_play: 5
+    property  int  req_playok: 6
+
     property  int  playtimeout: 5
     property  int  timecount: playtimeout
-    property var   command: { "type": 1, "id": "00001","message":"hello","score":0 }
+    property var   command: { "type": 0, "userid": "" }
 
-    function playCard(role,scoreVal){
-        console.log("play card ===>",scoreVal)
+    function playCard(cardName,score){
+        console.log("play card ===>",score)
         timecount=playtimeout
         if (role=="A"){
             playa.opacity=1
         }else{
             playb.opacity=1
         }
-        clockTip.text=playtimeout
+
+        command.type=play_card
+        command.id="tim"
+        command.messge=cardName
+        command.score=score
+        socket.sendTextMessage(JSON.stringify(command))
+
+        lockTip.text=playtimeout
         cardtimer.start()
     }
 
@@ -33,31 +47,92 @@ ApplicationWindow {
         playb.opacity=0
     }
 
-    function signIn(){
-        command.type=2
-        command.id="abc1111"
-        console.log(JSON.stringify(command))
+
+    function signIn(id){
+        console.log("User Signin....")
+        command.type=sign_in
+        command.userid=Math.random(100)
+        command.nickname=id
+        command.messge="signin"
         socket.sendTextMessage(JSON.stringify(command))
     }
+
+    function sendMessage(messge,toid){
+        console.log("User playCard....")
+        command.type=send_msg
+        command.id="tim"
+        command.messge=cardName
+        command.toid=toid
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
+    function getUsers(){
+        console.log("getUsers....")
+        command.type=get_users
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
+    function getUsersResult(message){
+        console.log("getUsersResult....",message)
+        console.log("playerModel=====",)
+        playerModel.clear()
+        var  msgObj=JSON.parse(message)
+        console.log(msgObj)
+        for(var key in msgObj) {
+            console.log(key, msgObj[key].status);
+            playerModel.append( {"userId":msgObj[key].userid,
+                                 "nickName":msgObj[key].nickname,
+                                 "decoration":msgObj[key].decoration
+                               });
+        }
+    }
+
+    function reqPlay(){
+        console.log("reqPlay....")
+        command.type=req_play
+        command.id="tim"
+        command.messge=cardName
+        command.toid=toid
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
+    function reqPlayOK(){
+        console.log("reqPlayOK....")
+        command.type=req_playok
+        command.id="tim"
+        command.messge=cardName
+        command.toid=toid
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
 
 
     WebSocket {
        id: socket
        url: "ws://127.0.01:8080/echo"
        onTextMessageReceived: {
-           console.log("textMessageRev")
+           console.log("textMessageRev",message)
+           clockTip.text=message
+           var recvMsg=JSON.parse(message)
+           switch (recvMsg.type){
+                case get_users:
+                    getUsersResult(recvMsg.message);
+                    break;
+                case req_play:
+                    break;
+           }
+           console.log("======>",recvMsg.type)
        }
 
        onStatusChanged: if (socket.status == WebSocket.Error) {
                             console.log("Error: " + socket.errorString)
                         } else if (socket.status == WebSocket.Open) {
-                            console.log("send message")
-
-                            socket.sendTextMessage(JSON.stringify(command))
-                            console.log(JSON.stringify(command))
+                            console.log("socket connected successful!")
+                            signIn(userId.text)
                         } else if (socket.status == WebSocket.Closed) {
                             socket.active=false
-                            messageBox.text += "\nSocket closed"
+                            console.log("socket closed")
+                           // messageBox.text += "\nSocket closed"
                         }
        active: false
      }
@@ -77,6 +152,11 @@ ApplicationWindow {
         text:""
     }
 
+    TextField{
+        id:userId
+        y:20
+
+    }
     Timer{
       id:cardtimer
       interval: 1000; running: false; repeat: true
@@ -92,6 +172,7 @@ ApplicationWindow {
           }
       }
     }
+
 
 
     Rectangle{
@@ -118,6 +199,43 @@ ApplicationWindow {
     }
 
 
+   Item{
+       id:userlist_id
+       width: parent.width
+       visible: false
+       height: parent.height
+       anchors.centerIn: parent
+       z:2000
+       Rectangle{
+       radius: 5
+       color: "black"
+       anchors.centerIn: parent
+       width: parent.width*0.9
+       height: parent.height*0.9
+           ListView {
+               id: listView
+               anchors.top: parent.top
+               anchors.topMargin: 15
+               width: parent.width
+               highlightRangeMode: ListView.StrictlyEnforceRange
+               height:parent.height
+               delegate: PlayerDelegate {
+                   id: delegate
+                    width: listView.width
+                    onClicked: {
+                        console.log("list view index===", index,playerModel.get(index).nickName)
+                        userlist_id.visible=false
+                    }
+               }
+               model: PlayerModel {
+                  id: playerModel
+               }
+               ScrollBar.vertical: ScrollBar { }
+            }
+       }
+   }
+
+
    Rectangle{
         width: parent.width*0.9
         height: parent.height*0.1
@@ -130,7 +248,12 @@ ApplicationWindow {
             spacing: 50
             GButton {
                id:todoplay
-               text: "我求战"
+               text: "找玩家"
+               onClicked: {
+                   userlist_id.visible=true
+                   getUsers()
+
+               }
             }
             GButton {
                 id:ifailed
@@ -138,9 +261,6 @@ ApplicationWindow {
             }
         }
     }
-
-
-
 
 
     Rectangle{
@@ -162,26 +282,27 @@ ApplicationWindow {
            text: "工兵"
             onClicked: {
                 console.log("hello111111")
-                playCard("A","1")
+                playCard("工兵","1")
             }
         }
 
         GButton {
             text: "排长"
             onClicked: {
-                playCard("B","1")
+                playCard("排长","2")
             }
         }
 
         GButton {
-            text: "连长"
+            text: "登录"
             onClicked: {
                 console.log("hello")
                 console.log("socket active====>",socket.active)
                 if (socket.active==true){
-                   socket.sendTextMessage(JSON.stringify(command))
+
                 }else{
                     socket.active=true
+
                 }
             }
         }

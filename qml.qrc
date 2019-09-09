@@ -49,6 +49,9 @@
         <file>image/text-go.png</file>
         <file>image/wave.png</file>
         <file>main.cpp</file>
+        <file>PlayerDialog.qml</file>
+        <file>PlayerModel.qml</file>
+        <file>PlayerDelegate.qml</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>
