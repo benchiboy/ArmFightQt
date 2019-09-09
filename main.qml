@@ -33,6 +33,13 @@ ApplicationWindow {
         playb.opacity=0
     }
 
+    function signIn(){
+        command.type=2
+        command.id="abc1111"
+        console.log(JSON.stringify(command))
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
 
     WebSocket {
        id: socket
@@ -55,11 +62,6 @@ ApplicationWindow {
        active: false
      }
 
-    function signIn(){
-
-
-
-    }
 
 
     Image {
