@@ -52,6 +52,64 @@
         <file>PlayerDialog.qml</file>
         <file>PlayerModel.qml</file>
         <file>PlayerDelegate.qml</file>
+        <file>SmokeText.qml</file>
+        <file>Button.qml</file>
+        <file>LogoAnimation.qml</file>
+        <file>BlockEmitter.qml</file>
+        <file>MenuEmitter.qml</file>
+        <file>image/logo-a.png</file>
+        <file>image/logo-e.png</file>
+        <file>image/logo-g.png</file>
+        <file>image/logo-s.png</file>
+        <file>image/logo-m.png</file>
+        <file>PrimaryPack.qml</file>
+        <file>image/particle-brick.png</file>
+        <file>image/particle-paint.png</file>
+        <file>image/particle-smoke.png</file>
+        <file>GameArea.qml</file>
+        <file>Settings.qml</file>
+        <file>samegame.qml</file>
+        <file>image/background-puzzle.png</file>
+        <file>image/background1.png</file>
+        <file>image/bar.png</file>
+        <file>image/blue-puzzle.png</file>
+        <file>image/blue.png</file>
+        <file>image/bubble-highscore.png</file>
+        <file>image/bubble-puzzle.png</file>
+        <file>image/but-game-1.png</file>
+        <file>image/but-game-2.png</file>
+        <file>image/but-game-3.png</file>
+        <file>image/but-game-4.png</file>
+        <file>image/but-game-new.png</file>
+        <file>image/but-menu.png</file>
+        <file>image/but-puzzle-next.png</file>
+        <file>image/but-quit.png</file>
+        <file>image/green-puzzle.png</file>
+        <file>image/green.png</file>
+        <file>image/icon-fail.png</file>
+        <file>image/icon-ok.png</file>
+        <file>image/icon-time.png</file>
+        <file>image/logo 2.png</file>
+        <file>image/logo 3.png</file>
+        <file>image/logo-a 2.png</file>
+        <file>image/logo-e 2.png</file>
+        <file>image/logo-g 2.png</file>
+        <file>image/logo-m 2.png</file>
+        <file>image/logo-s 2.png</file>
+        <file>image/red-puzzle.png</file>
+        <file>image/red.png</file>
+        <file>image/text-highscore-new.png</file>
+        <file>image/text-highscore.png</file>
+        <file>image/text-no-winner.png</file>
+        <file>image/text-p1-go.png</file>
+        <file>image/text-p1-won.png</file>
+        <file>image/text-p1.png</file>
+        <file>image/text-p2-go.png</file>
+        <file>image/text-p2-won.png</file>
+        <file>image/text-p2.png</file>
+        <file>image/yellow-puzzle.png</file>
+        <file>image/yellow.png</file>
+        <file>image/user.png</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

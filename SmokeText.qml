@@ -1,26 +1,3 @@
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-
-int main(int argc, char *argv[])
-{
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
-    QGuiApplication app(argc, argv);
-
-    QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
-    engine.load(url);
-
-    return app.exec();
-}
-
-
-
 /****************************************************************************
 **
 ** Copyright (C) 2017 The Qt Company Ltd.
@@ -71,24 +48,46 @@ int main(int argc, char *argv[])
 **
 ****************************************************************************/
 
-//#include <QGuiApplication>
-//#include <QQmlEngine>
-//#include <QQmlFileSelector>
-//#include <QQuickView>
+import QtQuick 2.0
+import QtQuick.Particles 2.0
 
-//int main(int argc, char *argv[])
-//{
-//    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-//    QCoreApplication::setOrganizationName("QtExamples");
-
-//    QGuiApplication app(argc, argv);
-
-//    QQuickView view;
-//    view.connect(view.engine(), &QQmlEngine::quit, &app, &QCoreApplication::quit);
-//    view.setSource(QUrl("qrc:/main.qml"));
-//    if (view.status() == QQuickView::Error)
-//        return -1;
-//    view.setResizeMode(QQuickView::SizeRootObjectToView);
-//    view.show();
-//    return app.exec();
-//}
+Item {
+    z: 10
+    property alias source: img.source
+    property alias system: emitter.system
+    property int playerNum: 1
+    function play() {
+        anim.running = true;
+    }
+    anchors.centerIn: parent
+    Image {
+        opacity: 0
+        id: img
+        anchors.centerIn: parent
+        rotation: playerNum == 1 ? -8 : -5
+        Emitter {
+            id: emitter
+            group: "smoke"
+            anchors.fill: parent
+            shape: MaskShape { source: img.source }
+            enabled: false
+            emitRate: 1000
+            lifeSpan: 600
+            size: 64
+            endSize: 32
+            velocity: AngleDirection { angleVariation: 360; magnitudeVariation: 160 }
+        }
+    }
+    SequentialAnimation {
+        id: anim
+        running: false
+        PauseAnimation { duration: 500}
+        ParallelAnimation {
+            NumberAnimation { target: img; property: "opacity"; from: 0.1; to: 1.0 }
+            NumberAnimation { target: img; property: "scale"; from: 0.1; to: 1.0 }
+        }
+        PauseAnimation { duration: 250}
+        ScriptAction { script: emitter.pulse(100); }
+        NumberAnimation { target: img; property: "opacity"; from: 1.0; to: 0.0 }
+    }
+}
