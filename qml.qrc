@@ -110,6 +110,8 @@
         <file>image/yellow-puzzle.png</file>
         <file>image/yellow.png</file>
         <file>image/user.png</file>
+        <file>SoundEffect.qml</file>
+        <file>image/bomb-action.wav</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

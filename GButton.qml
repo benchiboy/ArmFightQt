@@ -54,6 +54,7 @@ Rectangle {
     id: container
 
     property string text: "Button"
+    property int count: 0
 
     signal clicked
 
@@ -89,4 +90,22 @@ Rectangle {
         color: activePalette.buttonText
         text: container.text
     }
+
+    Rectangle{
+     anchors.right: parent.right
+     anchors.rightMargin: 2
+     width: 15
+     height: 15
+     opacity: count>0?1:0
+     radius: 50
+     color: "blue"
+     Text {
+         anchors.centerIn: parent
+         id: tagcount
+         text: qsTr(count+"")
+         font.pointSize: 12
+         color: "white"
+     }
+    }
+
 }
