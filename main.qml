@@ -377,17 +377,16 @@ ApplicationWindow {
     SmokeText {
         id: p1Text; source: "image/text-p1-go.png";
         system:    gameCanvas.ps
-
     }
 
     GameArea {
         id: gameCanvas
         z: 3
-        y: Settings.headerHeight
+        y:1
 
         width: parent.width
-        height: parent.height - Settings.headerHeight - Settings.footerHeight
-
+        height: 40
+         //parent.height - Settings.headerHeight - Settings.footerHeight
     }
 
     Popup {

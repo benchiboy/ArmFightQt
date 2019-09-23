@@ -112,6 +112,8 @@
         <file>image/user.png</file>
         <file>SoundEffect.qml</file>
         <file>image/bomb-action.wav</file>
+        <file>NewGameScreen.qml</file>
+        <file>GameOverScreen.qml</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>
