@@ -2,6 +2,8 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.3
 import QtWebSockets 1.0
+import QtQuick.Particles 2.0
+
 
 ApplicationWindow {
     id: window
@@ -107,7 +109,7 @@ ApplicationWindow {
 
 
 
-    WebSocket {
+     WebSocket {
        id: socket
        url: "ws://127.0.01:8080/echo"
        onTextMessageReceived: {
@@ -155,8 +157,8 @@ ApplicationWindow {
     TextField{
         id:userId
         y:20
-
     }
+
     Timer{
       id:cardtimer
       interval: 1000; running: false; repeat: true
@@ -173,6 +175,102 @@ ApplicationWindow {
       }
     }
 
+//        PropertyAnimation {
+//            id:animFadeIn
+//            target: playa
+//            duration: root.duration
+//            easing.type: root.easingType
+//            property: 'opacity';
+//            from: 0;
+//            to: root.innerOpacity
+//        }
+//        PropertyAnimation {
+//            id: animFadeOut
+//            target: playa
+//            duration: root.duration
+//            easing.type: root.easingType
+//            property: 'opacity';
+//            from: root.innerOpacity;
+//            to: 1
+//        }
+
+         property int countdown: 0
+
+
+        Timer {
+            id: countdownTimer
+            interval: 1000
+            running: window.countdown < 5
+            repeat: true
+            onTriggered: {
+                window.countdown++
+            }
+        }
+        Repeater {
+            model: ["image/background.png", "image/text-3.png", "image/text-2.png", "image/text-1.png", "image/text-go.png"]
+            delegate: Image {
+                visible: window.countdown <= index
+                opacity: window.countdown == index ? 0.5 : 0.1
+                scale: window.countdown >= index ? 1.0 : 0.0
+                source: modelData
+                z:2000
+                Behavior on opacity { NumberAnimation {} }
+                Behavior on scale { NumberAnimation {} }
+            }
+        }
+
+
+//        SpriteSequence {
+//            id: fishSprite
+//            width: 64
+//            height: 64
+//            interpolate: false
+//            goalSprite: ""
+
+//            Sprite {
+//                name: "left"
+//                source: "image/catch-action.png"
+//                frameWidth: 64
+//                frameHeight: 64
+//                frameCount: 2
+//                frameDuration: 200
+//                frameDurationVariation: 100
+//                to: { "front" : 1 }
+//            }
+
+//            NumberAnimation on x {
+//                id: fishSwim
+//                running: false
+//                property bool goingLeft: fishSprite.currentSprite == "right"
+//                to: goingLeft ? -360 : 360
+//                duration: 300
+//            }
+
+
+       // }
+
+
+
+
+//    SpringAnimation{
+//            id: springX
+//            target: playa
+//            property: "scale"
+//            spring: 1
+//            damping: 0.1
+//            epsilon: 0.2
+//    }
+
+
+//    SpringAnimation{
+//            id: springX
+//            target: playa
+//            property: "scale"
+//            spring: 1
+//            damping: 0.1
+//            epsilon: 0.2
+//    }
+
 
 
     Rectangle{
@@ -187,13 +285,28 @@ ApplicationWindow {
             spacing: 50
             GButton {
                id:playa
-               opacity: 0
+               opacity: 1
                text: "玩家A"
+               //RotationAnimation on rotation { to: 0; duration: 1000; direction: RotationAnimation.Clockwise }
+               Behavior on opacity { PropertyAnimation{ duration: 500 } }
             }
             GButton {
                 id:playb
-                opacity: 0
+                opacity: 1
                 text: "玩家B"
+            }
+
+            GButton {
+                id:playc
+                opacity: 1
+                text: "玩家c"
+                onClicked: {
+//                    springX.from = 1
+//                    springX.to = 0.01
+//                    springX.start()
+
+                    playa.opacity=0
+                }
             }
         }
     }
