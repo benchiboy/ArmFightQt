@@ -78,7 +78,7 @@ Item {
                 id:curruser_image
                 width: 50
                 height: 50
-                  anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
                 source: "image/user.png"
             }
             Text {

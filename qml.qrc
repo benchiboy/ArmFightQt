@@ -124,6 +124,14 @@
         <file>image/toolbar.png</file>
         <file>image/xiaoxi.png</file>
         <file>image/shengyin.png</file>
+        <file>image/jinbi.png</file>
+        <file>image/xunzhang.png</file>
+        <file>InfoBar.qml</file>
+        <file>image/jinbi-small.png</file>
+        <file>image/kulian.png</file>
+        <file>image/xiaolian.png</file>
+        <file>image/dianzan.png</file>
+        <file>image/currency.wav</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

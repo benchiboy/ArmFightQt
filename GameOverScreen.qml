@@ -55,25 +55,176 @@ import QtQuick.Particles 2.0
 Item {
     id: gameOverScreen
 
+    signal overButtonClicked
 
     Image {
         id: img
         source: "image/text-gameover.png"
         anchors.top: parent.top
-        anchors.topMargin: 60
+        anchors.topMargin: 15
     }
 
     Text {
-        text: "You saved  fishes!"
+        id:playresult
+        text: ">决战结果<"
         anchors.top: img.bottom
-        anchors.topMargin: 30
+        anchors.topMargin: 15
         anchors.horizontalCenter: parent.horizontalCenter
         font.bold: true
-        color: "#000000"
-        opacity: 0.5
+        color: "red"
+        font.pixelSize: 18
+        opacity: 0.9
     }
 
+        Row{
+            anchors.topMargin: 15
+            anchors.top: playresult.bottom
+            height: 40
+            anchors.left: parent.left
+            anchors.leftMargin: 80
+            Rectangle{
+                width: parent.width*0.2
+                height: 80
+                color: "red"
+                Column{
+                    anchors.fill: parent
+                    spacing: 5
 
+                    Text {
+                        id: name
+                        text: qsTr("winner")
+                        font.bold: true
+                        color: "white"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 16
+                    }
+
+                    Image {
+                        id: winner
+                        source: "image/xiaolian.png"
+                          anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+
+                    Text {
+                        id: info
+                        text: qsTr("此战获得 10个金币")
+                        font.bold: true
+                        color: "blue"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 14
+                    }
+                }
+            }
+        }
+
+        Row{
+            anchors.topMargin: 15
+            anchors.top: playresult.bottom
+            height: 40
+            anchors.right: parent.right
+            anchors.rightMargin:  80
+            Rectangle{
+                width: parent.width*0.2
+                height: 50
+                color: "red"
+                Column{
+                    anchors.fill: parent
+                    spacing: 5
+
+                    Text {
+                        id: loster
+                        text: qsTr("tim")
+                        font.bold: true
+                        color: "white"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 16
+                    }
+
+
+                    Image {
+                        id: kulian
+                        source: "image/kulian.png"
+                          anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        id: info2
+                        text: qsTr("此战获得 10个金币")
+                        font.bold: true
+                        color: "blue"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 14
+                    }
+
+                }
+            }
+        }
+
+
+        Row{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 20
+
+            Column{
+                Image {
+                    id:curruser_image
+                    width: 50
+                    height: 50
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "image/user.png"
+                }
+                Text {
+                    id: name11
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("currUser")
+                    font.pixelSize: 18
+                }
+            }
+
+            Image {
+                id:arrow
+                anchors.verticalCenter: parent.verticalCenter
+                width: 32
+                height: 32
+                source: "image/arrow.png"
+            }
+
+            Column{
+                Image {
+                    width: 50
+                    height: 50
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        id:to_user
+                        source: "image/toUser.png"
+                        MouseArea{
+                            id:touser_mouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: {
+                                userlist_id.visible=true
+                                getUsers()
+                            }
+                            onEntered: {
+                                to_user.source="image/user.png"
+                            }
+                            onExited:  {
+                                to_user.source="image/toUser.png"
+                            }
+
+                        }
+                     }
+
+                Text {
+                    id: other
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: otherUser=="" ? "select":qsTr(otherUser)
+                    font.pixelSize: 18
+                }
+            }
+        }
 
     Image {
         source: "image/button-play.png"
@@ -82,8 +233,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked:{
-
-
+                gameOverScreen.overButtonClicked()
             }
         }
     }

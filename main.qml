@@ -62,6 +62,8 @@ ApplicationWindow {
     property  string  currCard:""
     property  string  winnerType:""
     property  string  currRole:""
+    property  int     goldcoins: 0
+    property  int     decorations: 0
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
@@ -231,6 +233,13 @@ ApplicationWindow {
         spawnSound.play()
     }
 
+    function showCoinLauch(){
+        console.log("=====>showCoinLauch====>")
+        coinLaunch.start()
+        goldcoins++
+        spawnSound.source="image/currency.wav"
+        spawnSound.play()
+    }
 
     MessageDialog {
         id: playconfirm
@@ -420,9 +429,6 @@ ApplicationWindow {
         }
     }
 
-
-
-
     Timer{
       id: msgboxTimer
       interval: 1500; running: false; repeat: true
@@ -473,6 +479,9 @@ ApplicationWindow {
       interval: 1000; running: false; repeat: true
       onTriggered:{
            console.log("Timer===>"+currUser+"===>clear result...")
+           if (winnerType=="B"){
+               showCoinLauch()
+           }
            if (winnerType!=currRole){
                 if (currCard=="工兵"){
                     card_gongbing.count--
@@ -559,7 +568,11 @@ ApplicationWindow {
                         card_dilei.enabled=false
                     }
                 }
+          }else{
+              showCoinLauch()
           }
+
+          console.log(winnerType,currRole)
           play_curruser.opacity=0
           play_otheruser.opacity=0
           clearTimer.running=false
@@ -635,10 +648,6 @@ ApplicationWindow {
 //                duration: 300
 //            }
       // }
-
-
-
-
 //    SpringAnimation{
 //            id: springX
 //            target: playa
@@ -662,7 +671,12 @@ ApplicationWindow {
     id:gameOver
     anchors.fill: parent
     visible: false
+    onOverButtonClicked: {
+        console.log("Event===>Start Game...")
+         startGame(currUser,otherUser)
+    }
   }
+
 
   NewGameScreen{
     id:newGame
@@ -737,7 +751,31 @@ ApplicationWindow {
    id:gameMain
    anchors.fill: parent
 
+   InfoBar{
+     id:infobar
+     anchors.fill: parent
+   }
+
+   Image {
+       id: coin
+       property var target: { "x" : gameMain.width-60, "y" :0 }
+       source: "image/jinbi-small.png"
+       visible: false
+       z:2000
+   }
+
+   SequentialAnimation {
+       id: coinLaunch
+       PropertyAction { target: coin; property: "visible"; value: true }
+       ParallelAnimation {
+           NumberAnimation { target: coin; property: "x"; from: killarea.width/2; to: coin.target.x }
+           NumberAnimation { target: coin; property: "y"; from: killarea.height/2+60; to: coin.target.y }
+       }
+       PropertyAction { target: coin; property: "visible"; value: false }
+   }
+
    Rectangle{
+       id:killarea
        width: parent.width*0.9
        height: parent.height*0.2
        anchors.top: parent.top
@@ -956,7 +994,8 @@ ApplicationWindow {
                 onClicked: {
                  //playm_area.border.color="red"
                   // sendGiveup(currUser,otherUser)
-                    voiceTimer.running=true
+                   // voiceTimer.running=true
+                    coinLaunch.start()
                 }
             }
 
@@ -1090,7 +1129,9 @@ ApplicationWindow {
 
     Component.onCompleted: {
         gameMain.visible=false
-//        singIn.visible=false
+        singIn.visible=true
+        newGame.visible=false
+        gameOver.visible=false
     }
   }
 
