@@ -5,13 +5,13 @@ import QtWebSockets 1.0
 import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.13
 import QtQuick.Particles 2.0
-
+import QtMultimedia 5.13
 
 ApplicationWindow {
     id: window
     visible: true
-    width: 320
-    height: 560
+    width: 360
+    height: 630
     title: qsTr("Stack")
     SystemPalette { id: activePalette }
 
@@ -54,8 +54,10 @@ ApplicationWindow {
     property  int  playtimeout: 5
     property  int  timecount: playtimeout
 
-    property  bool  bplay_card: false
+    property  bool    bplay_card: false
     property  bool    bgameOver: false
+    property  bool    isGameWinner: false
+
     property  string  currUser:""
     property  string  otherUser:""
 
@@ -67,10 +69,12 @@ ApplicationWindow {
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
-    property  var  voiceGoDie: {"waveName":"image/bomb-action.wav","waveText":"吃我一拳！"}
-    property  var  voiceBomb:  {"waveName":"image/bomb-action.wav","waveText":"小心地雷炸弹！"}
-
+    property  var       voiceFight: {"waveName":"image/voice_fight.mp3","waveText":"有本事，放马过来..."}
+    property  var       voiceBomb:  {"waveName":"image/voice_bomb.mp3","waveText":"小心地雷炸弹！"}
+    property  var       voiceTooSlow:  {"waveName":"image/voice_tooslow.mp3","waveText":"你太慢了，赶快出棋"}
+    property  string    playVoiceFile:""
     property  var   command: { "type": 0, "userid": "" }
+
 
     function playCard(fromId,toId,message,score){
         console.log("=====>playCard====>")
@@ -261,7 +265,7 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-       url: "ws://10.89.4.244:8080/echo"
+       url: "ws://212.64.29.57:9080/echo"
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
            var recvMsg=JSON.parse(message)
@@ -307,6 +311,7 @@ ApplicationWindow {
                     break;
                 case send_voice:
                     console.log("Recv send_voice===>")
+                    playVoiceFile=recvMsg.message
                     voiceTimer.running=true
                     break;
                 case send_voice_resp:
@@ -319,6 +324,7 @@ ApplicationWindow {
                     console.log("Recv req_playyes===>")
                     otherUser=recvMsg.fromid
                     //发起方先出
+                    showMsgBox("对方已经同意,开始游戏吧!")
                     play_curruser_area.border.color="red"
                     bplay_card=true
                     break;
@@ -380,10 +386,12 @@ ApplicationWindow {
                 case req_giveup:
                     console.log("Recv req_giveup===>")
                     showGameOver()
+                    isGameWinner=true
                     break;
                 case req_giveup_resp:
                     console.log("Recv req_giveup_resp===>")
                     showGameOver()
+                    isGameWinner=false
                 default:
                     console.log("Recv error command===>")
            }
@@ -408,14 +416,14 @@ ApplicationWindow {
 
     Image {
         source:"/image/background1.png"
-
+        width: 360
     }
 
 
     Rectangle{
         id:msgbox
         anchors.centerIn: parent;
-        z:3000
+        z:200
         visible: false
         width: msgcontext.width+10
         height: msgcontext.height+10
@@ -441,8 +449,8 @@ ApplicationWindow {
 
 
    SmokeText {
-        id: p1Text; source: "image/text-p1-go.png";
-        system:    gameCanvas.ps
+        id: p1Text; source: "image/icon-fail.png";
+        //system:    gameCanvas.ps
     }
 
     GameArea {
@@ -451,8 +459,7 @@ ApplicationWindow {
         y:1
         width: parent.width
         height: 1
-         //parent.height - Settings.headerHeight - Settings.footerHeight
-    }
+   }
 
    SigninScreen{
         id:singIn
@@ -493,6 +500,7 @@ ApplicationWindow {
                 }
                 if (currCard=="排长"){
                     card_paizhang.count--
+                       p1Text.play()
                     if (card_paizhang.count==0){
                         card_paizhang.border.color="red"
                         card_paizhang.enabled=false
@@ -500,6 +508,7 @@ ApplicationWindow {
                 }
                 if (currCard=="连长"){
                     card_lianzhang.count--
+                       p1Text.play()
                     if (card_lianzhang.count==0){
                         card_lianzhang.border.color="red"
                         card_lianzhang.enabled=false
@@ -507,6 +516,7 @@ ApplicationWindow {
                 }
                 if (currCard=="营长"){
                     card_yingzhang.count--
+                       p1Text.play()
                     if (card_yingzhang.count==0){
                         card_yingzhang.border.color="red"
                         card_yingzhang.enabled=false
@@ -514,6 +524,7 @@ ApplicationWindow {
                 }
                 if (currCard=="团长"){
                     card_tuanzhang.count--
+                       p1Text.play()
                     if (card_tuanzhang.count==0){
                         card_tuanzhang.border.color="red"
                         card_tuanzhang.enabled=false
@@ -521,6 +532,7 @@ ApplicationWindow {
                 }
                 if (currCard=="旅长"){
                     card_lvzhang.count--
+                       p1Text.play()
                     if (card_lvzhang.count==0){
                         card_lvzhang.border.color="red"
                         card_lvzhang.enabled=false
@@ -528,6 +540,7 @@ ApplicationWindow {
                 }
                 if (currCard=="师长"){
                     card_shizhang.count--
+                       p1Text.play()
                     if (card_shizhang.count==0){
                         card_shizhang.border.color="red"
                         card_shizhang.enabled=false
@@ -535,6 +548,7 @@ ApplicationWindow {
                 }
                 if (currCard=="军长"){
                     card_junzhang.count--
+                       p1Text.play()
                     if (card_junzhang.count==0){
                         card_junzhang.border.color="red"
                         card_junzhang.enabled=false
@@ -542,6 +556,7 @@ ApplicationWindow {
                 }
                 if (currCard=="军旗"){
                     card_junqi.count--
+                       p1Text.play()
                     if (card_junqi.count==0){
                         card_junqi.border.color="red"
                         card_junqi.enabled=false
@@ -549,6 +564,7 @@ ApplicationWindow {
                 }
                 if (currCard=="司令"){
                     card_siling.count--
+                       p1Text.play()
                     if (card_siling.count==0){
                         card_siling.border.color="red"
                         card_siling.enabled=false
@@ -556,6 +572,7 @@ ApplicationWindow {
                 }
                 if (currCard=="炸弹"){
                     card_zhadan.count--
+                       p1Text.play()
                     if (card_zhadan.count==0){
                         card_zhadan.border.color="red"
                         card_zhadan.enabled=false
@@ -563,6 +580,7 @@ ApplicationWindow {
                 }
                 if (currCard=="地雷"){
                     card_dilei.count--
+                       p1Text.play()
                     if (card_dilei.count==0){
                         card_dilei.border.color="red"
                         card_dilei.enabled=false
@@ -577,7 +595,16 @@ ApplicationWindow {
           play_otheruser.opacity=0
           clearTimer.running=false
           if (bgameOver){
-             showGameOver()
+
+              if (winnerType!=currRole){
+                 isGameWinner=false
+              }else{
+                 isGameWinner=true
+              }
+              showGameOver()
+
+
+
           }
 
       }
@@ -732,9 +759,9 @@ ApplicationWindow {
       }
   }
 
-  SoundEffect {
-      id: spawnSound
-      source: "image/bomb-action.wav"
+  MediaPlayer {
+    id: spawnSound
+    source: "image/bomb-action.wav"
   }
 
   Timer{
@@ -742,6 +769,7 @@ ApplicationWindow {
     interval: 100; running: false; repeat: true
     onTriggered:{
        voiceTimer.running=false
+       spawnSound.source=playVoiceFile
        spawnSound.play()
     }
   }
@@ -952,11 +980,11 @@ ApplicationWindow {
                            Text {
                               id: name33
                               anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(voiceGoDie.waveText)
+                              text: qsTr(voiceFight.waveText)
                            }
                        }
                        onClicked: {
-                            sendVoice(currUser,otherUser,voiceGoDie.waveName)
+                            sendVoice(currUser,otherUser,voiceFight.waveName)
                        }
                    }
 
@@ -983,6 +1011,32 @@ ApplicationWindow {
                        }
                        onClicked: {
                             sendVoice(currUser,otherUser,voiceBomb.waveName)
+                       }
+                   }
+
+                   MenuItem {
+                       Row{
+                           anchors.verticalCenter: parent.verticalCenter
+                           spacing: 10
+                           Text {
+                              id: name51
+                                text: qsTr(" ")
+                           }
+                           Image {
+                               anchors.verticalCenter: parent.verticalCenter
+                              id: name52
+                               source: "image/shengyin.png"
+                               width: 24
+                               height: 24
+                           }
+                           Text {
+                              id: name53
+                              anchors.verticalCenter: parent.verticalCenter
+                              text: qsTr(voiceTooSlow.waveText)
+                           }
+                       }
+                       onClicked: {
+                            sendVoice(currUser,otherUser,voiceTooSlow.waveName)
                        }
                    }
                }

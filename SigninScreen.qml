@@ -51,7 +51,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.3
-Popup {
+Item {
         id: popup
         anchors.centerIn: parent
         width: parent.width; height: parent.height
@@ -69,8 +69,10 @@ Popup {
 //      }
 
         Row {
-            x: 60
-            y: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 20
+
             Image { source: "image/logo-g.png" }
             Image { source: "image/logo-a.png" }
             Image { source: "image/logo-m.png" }
@@ -90,16 +92,27 @@ Popup {
                 id:userId
                 focus: true
                 placeholderText: "输入登录账户"
+                background:Rectangle{
+                    radius: 30
+                    color:"white"
+                    width: 180
+                }
             }
 
             TextField{
-                id:passWd
+                id:userPwd
                 focus: true
                 placeholderText: "输入登录密码"
+                background:Rectangle{
+                    radius: 30
+                    color:"white"
+                    width: 180
+                }
             }
 
             Row{
                 anchors.horizontalCenter: parent.horizontalCenter
+
                 Text {
                     id: reguser
                     color:  regmouse.pressed?"red":"blue"
@@ -116,12 +129,11 @@ Popup {
 //                            singUp.visible=true
                         }
                     }
-
                 }
                 spacing: 60
+
                 Text {
                     id: forgetpwd
-
                     color: resetmouse.pressed?"red":"blue"
                     font.pixelSize: 15
                     font.underline: true
@@ -143,6 +155,10 @@ Popup {
                 text: "登录"
                 count: 0
                 onClicked: {
+                    if (userId.text==""){
+                        showMsgBox("登录账号不能为空！")
+                        return
+                    }
                     if (socket.active==false){
                         socket.active=true
                      }else{
@@ -151,17 +167,5 @@ Popup {
                 }
             }
 
-            GButton {
-                id:signin1
-                width: 100
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "登录"
-                count: 0
-                onClicked: {
-                   spawnSound.play()
-                }
-            }
-
-
-        }
+          }
      }
