@@ -92,7 +92,7 @@ Item {
 
                     Text {
                         id: name
-                        text: qsTr("winner")
+                        text: qsTr(gameWinner)
                         font.bold: true
                         color: "white"
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -134,7 +134,7 @@ Item {
 
                     Text {
                         id: loster
-                        text: qsTr("tim")
+                        text: qsTr(gameLoster)
                         font.bold: true
                         color: "white"
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -179,7 +179,7 @@ Item {
                 Text {
                     id: name11
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("currUser")
+                    text: qsTr(currUser)
                     font.pixelSize: 18
                 }
             }

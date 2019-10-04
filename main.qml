@@ -56,14 +56,20 @@ ApplicationWindow {
 
     property  bool  bplay_card: false
     property  bool    bgameOver: false
+
     property  string  currUser:""
     property  string  otherUser:""
-
     property  string  currCard:""
     property  string  winnerType:""
     property  string  currRole:""
     property  int     goldcoins: 0
     property  int     decorations: 0
+
+    property  string  gameWinner:""
+    property  string  gameLoster:""
+
+
+
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
@@ -261,7 +267,7 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-       url: "ws://10.89.4.244:8080/echo"
+       url: "ws://127.0.0.1:8080/echo"
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
            var recvMsg=JSON.parse(message)
@@ -376,13 +382,28 @@ ApplicationWindow {
                     currRole=recvMsg.role
                     winnerType=recvMsg.winner
                     clearTimer.running=true
+
+                    if (currRole!=winnerType){
+                        gameLoster=currUser
+                        gameWinner=otherUser
+                    }else{
+                        gameLoster=otherUser
+                        gameWinner=currUser
+                    }
                     break;
                 case req_giveup:
                     console.log("Recv req_giveup===>")
+                    gameWinner=currUser
+                    gameLoster=otherUser
                     showGameOver()
+
                     break;
                 case req_giveup_resp:
                     console.log("Recv req_giveup_resp===>")
+
+                    gameWinner=otherUser
+                    gameLoster=currUser
+
                     showGameOver()
                 default:
                     console.log("Recv error command===>")
@@ -700,13 +721,16 @@ ApplicationWindow {
       height: parent.height
       anchors.centerIn: parent
       z:2000
+
       Rectangle{
+
       radius: 5
-      color: "black"
+      color: "white"
       anchors.centerIn: parent
       width: parent.width*0.9
       height: parent.height*0.9
-          ListView {
+
+      ListView {
               id: listView
               anchors.top: parent.top
               anchors.topMargin: 15

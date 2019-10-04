@@ -59,6 +59,7 @@ ItemDelegate {
     signal clicked
 
     Rectangle {
+
             height: parent.height-1
             width: parent.width
             color: mouse.pressed ? "grey" : "#ddd"
