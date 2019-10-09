@@ -5,13 +5,13 @@ import QtWebSockets 1.0
 import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.13
 import QtQuick.Particles 2.0
-
+import QtMultimedia 5.13
 
 ApplicationWindow {
     id: window
     visible: true
-    width: 320
-    height: 560
+    width: 360
+    height: 630
     title: qsTr("Stack")
     SystemPalette { id: activePalette }
 
@@ -27,6 +27,10 @@ ApplicationWindow {
     property  int  sign_in_resp: 2000
     property  int  play_card: 1001
     property  int  play_card_resp: 2001
+
+    property  int  req_play_card: 1055
+    property  int  req_play_card_resp: 2055
+
     property  int  query_result: 1012
     property  int  query_result_resp: 2012
     property  int  send_msg: 1003
@@ -48,17 +52,27 @@ ApplicationWindow {
     property  int  init_data: 1030
     property  int  init_data_resp: 2030
 
+    property  int  change_user: 1040
+    property  int  change_user_resp: 2040
+
+    property  int  offline_msg: 1050
+
+    property  int  robot_type: 1
+    property  int  human_type: 2
+
     property  int  start_game: 1035
     property  int  start_game_resp: 2035
 
     property  int  playtimeout: 5
     property  int  timecount: playtimeout
 
-    property  bool  bplay_card: false
+    property  bool    bplay_card: false
     property  bool    bgameOver: false
+    property  bool    isGameWinner: false
 
     property  string  currUser:""
     property  string  otherUser:""
+    property  int     otherUserType:0
     property  string  currCard:""
     property  string  winnerType:""
     property  string  currRole:""
@@ -73,10 +87,12 @@ ApplicationWindow {
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
-    property  var  voiceGoDie: {"waveName":"image/bomb-action.wav","waveText":"吃我一拳！"}
-    property  var  voiceBomb:  {"waveName":"image/bomb-action.wav","waveText":"小心地雷炸弹！"}
-
+    property  var       voiceFight: {"waveName":"image/voice_fight.mp3","waveText":"有本事，放马过来..."}
+    property  var       voiceBomb:  {"waveName":"image/voice_bomb.mp3","waveText":"小心地雷炸弹！"}
+    property  var       voiceTooSlow:  {"waveName":"image/voice_tooslow.mp3","waveText":"你太慢了，赶快出棋"}
+    property  string    playVoiceFile:""
     property  var   command: { "type": 0, "userid": "" }
+
 
     function playCard(fromId,toId,message,score){
         console.log("=====>playCard====>")
@@ -143,6 +159,30 @@ ApplicationWindow {
 
     function initDataResp(initMsg){
        console.log("=====>initDataResp====>")
+       console.log("----->",initMsg)
+       gameMain.visible=true
+       newGame.visible=false
+       gameOver.visible=false
+       bgameOver=false
+       var  initObj=JSON.parse(initMsg)
+       card_gongbing.count=initObj.gongbing
+       card_paizhang.count=initObj.paizhang
+       card_lianzhang.count=initObj.lianzhang
+       card_yingzhang.count=initObj.yingzhang
+       card_tuanzhang.count=initObj.tuanzhang
+       card_lvzhang.count=initObj.lvzhang
+       card_shizhang.count=initObj.shizhang
+       card_junzhang.count=initObj.junzhang
+       card_siling.count=initObj.siling
+       card_dilei.count=initObj.dilei
+       card_zhadan.count=initObj.zhadan
+       card_junqi.count=initObj.junqi
+       card_dilei.count=initObj.dilei
+
+        if (otherUserType==robot_type){
+             reqPlayCard(currUser,otherUser,"RRR",0)
+        }
+
     }
 
     function getUsers(){
@@ -158,9 +198,11 @@ ApplicationWindow {
         console.log(msgObj)
         for(var key in msgObj) {
             console.log(key, msgObj[key].status);
+            console.log("玩家的类型", msgObj[key].playertype);
             playerModel.append( {"userId":msgObj[key].userid,
                                  "nickName":msgObj[key].nickname,
-                                 "decoration":msgObj[key].decoration
+                                 "decoration":msgObj[key].decoration,
+                                 "playerType":msgObj[key].playertype
                                });
         }
     }
@@ -209,6 +251,8 @@ ApplicationWindow {
 
     function startGame(fromId,toId){
         console.log("=====>startGame====>")
+
+
         command.type=start_game
         command.fromid=fromId
         command.messge="start play a game"
@@ -247,6 +291,40 @@ ApplicationWindow {
         spawnSound.play()
     }
 
+    function changeUser(fromId,toId){
+        console.log("=====>changeUser====>")
+        command.type=change_user
+        command.fromid=fromId
+        command.messge="改变用户请求"
+        command.toid=toId
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
+
+    function reqPlayCard(fromId,toId,message,score){
+        console.log("=====>playCard====>")
+        if (!bplay_card){
+            console.log("Wait a another player...")
+            return
+        }
+        bplay_card=false
+        command.type=req_play_card
+        command.fromid=fromId
+        command.message=message
+        command.toid=toId
+        command.score=score
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
+
+//    BusyIndicator {
+//        id: busyIndicator
+//        running: true
+//        z:900
+//        anchors.centerIn: parent
+
+//    }
+
     MessageDialog {
         id: playconfirm
         title: "提示?"
@@ -257,6 +335,7 @@ ApplicationWindow {
         Component.onCompleted: visible = false
         onYes: {
                 console.log("copied")
+               BusyIndicator.running=true
                 reqPlayYes(currUser,otherUser)
                }
         onNo: {
@@ -299,11 +378,6 @@ ApplicationWindow {
                     console.log("Recv init_data_resp===>")
                     initDataResp(recvMsg.message);
                     break;
-                case req_play:
-                    console.log("Recv req_play===>")
-                    otherUser=recvMsg.fromid
-                    playconfirm.visible=true
-                    break;
                 case send_msg:
                     console.log("Recv send_msg===>")
                     showMsgBox(recvMsg.message)
@@ -313,10 +387,16 @@ ApplicationWindow {
                     break;
                 case send_voice:
                     console.log("Recv send_voice===>")
+                    playVoiceFile=recvMsg.message
                     voiceTimer.running=true
                     break;
                 case send_voice_resp:
                     console.log("Recv send_voice_resp===>")
+                    break;
+                case req_play:
+                    console.log("Recv req_play===>")
+                    otherUser=recvMsg.fromid
+                    playconfirm.visible=true
                     break;
                 case req_play_resp:
                     console.log("Recv req_play_resp===>")
@@ -325,13 +405,26 @@ ApplicationWindow {
                     console.log("Recv req_playyes===>")
                     otherUser=recvMsg.fromid
                     //发起方先出
-                    play_curruser_area.border.color="red"
+                    showMsgBox("对方已经同意,开始游戏吧!")
+
+                     if (otherUserType==human_type){
+                        play_curruser_area.border.color="red"
+                     }else{
+                         play_otheruser_area.border.color="red"
+
+                     }
+
                     bplay_card=true
                     break;
                 case req_playyes_resp:
                     console.log("Recv req_playyes_resp===>")
                     //主先出牌
-                    play_otheruser_area.border.color="red"
+                    if (otherUserType==human_type){
+                         play_otheruser_area.border.color="red"
+                    }else{
+                        play_curruser_area.border.color="red"
+                    }
+
                     break;
                 case req_playno:
                     console.log("Recv req_playno===>")
@@ -361,9 +454,13 @@ ApplicationWindow {
                      //显示下一步谁出牌
                      play_curruser_area.border.color="transparent"
                      play_otheruser_area.border.color="red"
+
                     if ( recvMsg.role=="M"){
                         play_curruser.opacity=1
                         play_curruser.text=recvMsg.message
+                        if (otherUserType==robot_type){
+                            resultTimer.running=true
+                        }
                     }else{
                         play_curruser.opacity=1
                         play_curruser.text=recvMsg.message
@@ -371,8 +468,10 @@ ApplicationWindow {
                         resultTimer.running=true
                     }
                     break;
+
                 case query_result_resp:
                     console.log("Recv query_result_resp===>")
+                    console.log(recvMsg.status)
                     if (recvMsg.status=="E"){
                         console.log("game over...")
                         bgameOver=true
@@ -397,14 +496,33 @@ ApplicationWindow {
                     gameLoster=otherUser
                     showGameOver()
 
+                    isGameWinner=true
                     break;
                 case req_giveup_resp:
                     console.log("Recv req_giveup_resp===>")
-
                     gameWinner=otherUser
                     gameLoster=currUser
-
                     showGameOver()
+                    isGameWinner=false
+                    break
+
+                case change_user:
+                    console.log("Recv change_user===>")
+                    otherUser=""
+                    showMsgBox("CHANGE_USER")
+                    console.log("======>"+otherUser+"===========>")
+                    break;
+                case change_user_resp:
+                    console.log("Recv change_user_resp===>")
+                    break
+                case offline_msg:
+                    console.log("Recv offline_msg===>")
+                    showMsgBox("对方下线了")
+                    otherUser=""
+                    break
+                case req_play_card_resp:
+                    console.log("Recv req_play_card_resp===>")
+                    break
                 default:
                     console.log("Recv error command===>")
            }
@@ -429,14 +547,14 @@ ApplicationWindow {
 
     Image {
         source:"/image/background1.png"
-
+        width: 360
     }
 
 
     Rectangle{
         id:msgbox
         anchors.centerIn: parent;
-        z:3000
+        z:200
         visible: false
         width: msgcontext.width+10
         height: msgcontext.height+10
@@ -462,8 +580,8 @@ ApplicationWindow {
 
 
    SmokeText {
-        id: p1Text; source: "image/text-p1-go.png";
-        system:    gameCanvas.ps
+        id: p1Text; source: "image/icon-fail.png";
+        //system:    gameCanvas.ps
     }
 
     GameArea {
@@ -472,8 +590,7 @@ ApplicationWindow {
         y:1
         width: parent.width
         height: 1
-         //parent.height - Settings.headerHeight - Settings.footerHeight
-    }
+   }
 
    SigninScreen{
         id:singIn
@@ -485,7 +602,7 @@ ApplicationWindow {
         visible: false
    }
 
-    Timer{
+   Timer{
       id: resultTimer
       interval: 1500; running: false; repeat: true
       onTriggered:{
@@ -495,6 +612,19 @@ ApplicationWindow {
       }
     }
 
+   Timer{
+      id: playcardTimer
+      interval: 1500; running: false; repeat: true
+      onTriggered:{
+          playcardTimer.running=false
+          if (otherUserType==robot_type){
+              bplay_card=true
+              reqPlayCard(currUser,otherUser,"工兵",1)
+          }
+      }
+    }
+
+
     Timer{
       id: clearTimer
       interval: 1000; running: false; repeat: true
@@ -503,7 +633,8 @@ ApplicationWindow {
            if (winnerType=="B"){
                showCoinLauch()
            }
-           if (winnerType!=currRole){
+
+          if (winnerType!=currRole){
                 if (currCard=="工兵"){
                     card_gongbing.count--
                      p1Text.play()
@@ -514,6 +645,7 @@ ApplicationWindow {
                 }
                 if (currCard=="排长"){
                     card_paizhang.count--
+                       p1Text.play()
                     if (card_paizhang.count==0){
                         card_paizhang.border.color="red"
                         card_paizhang.enabled=false
@@ -521,6 +653,7 @@ ApplicationWindow {
                 }
                 if (currCard=="连长"){
                     card_lianzhang.count--
+                       p1Text.play()
                     if (card_lianzhang.count==0){
                         card_lianzhang.border.color="red"
                         card_lianzhang.enabled=false
@@ -528,6 +661,7 @@ ApplicationWindow {
                 }
                 if (currCard=="营长"){
                     card_yingzhang.count--
+                       p1Text.play()
                     if (card_yingzhang.count==0){
                         card_yingzhang.border.color="red"
                         card_yingzhang.enabled=false
@@ -535,6 +669,7 @@ ApplicationWindow {
                 }
                 if (currCard=="团长"){
                     card_tuanzhang.count--
+                       p1Text.play()
                     if (card_tuanzhang.count==0){
                         card_tuanzhang.border.color="red"
                         card_tuanzhang.enabled=false
@@ -542,6 +677,7 @@ ApplicationWindow {
                 }
                 if (currCard=="旅长"){
                     card_lvzhang.count--
+                       p1Text.play()
                     if (card_lvzhang.count==0){
                         card_lvzhang.border.color="red"
                         card_lvzhang.enabled=false
@@ -549,6 +685,7 @@ ApplicationWindow {
                 }
                 if (currCard=="师长"){
                     card_shizhang.count--
+                       p1Text.play()
                     if (card_shizhang.count==0){
                         card_shizhang.border.color="red"
                         card_shizhang.enabled=false
@@ -556,6 +693,7 @@ ApplicationWindow {
                 }
                 if (currCard=="军长"){
                     card_junzhang.count--
+                       p1Text.play()
                     if (card_junzhang.count==0){
                         card_junzhang.border.color="red"
                         card_junzhang.enabled=false
@@ -563,6 +701,7 @@ ApplicationWindow {
                 }
                 if (currCard=="军旗"){
                     card_junqi.count--
+                       p1Text.play()
                     if (card_junqi.count==0){
                         card_junqi.border.color="red"
                         card_junqi.enabled=false
@@ -570,6 +709,7 @@ ApplicationWindow {
                 }
                 if (currCard=="司令"){
                     card_siling.count--
+                       p1Text.play()
                     if (card_siling.count==0){
                         card_siling.border.color="red"
                         card_siling.enabled=false
@@ -577,6 +717,7 @@ ApplicationWindow {
                 }
                 if (currCard=="炸弹"){
                     card_zhadan.count--
+                       p1Text.play()
                     if (card_zhadan.count==0){
                         card_zhadan.border.color="red"
                         card_zhadan.enabled=false
@@ -584,6 +725,7 @@ ApplicationWindow {
                 }
                 if (currCard=="地雷"){
                     card_dilei.count--
+                       p1Text.play()
                     if (card_dilei.count==0){
                         card_dilei.border.color="red"
                         card_dilei.enabled=false
@@ -597,12 +739,22 @@ ApplicationWindow {
           play_curruser.opacity=0
           play_otheruser.opacity=0
           clearTimer.running=false
-          if (bgameOver){
-             showGameOver()
-          }
+          //如果是机器人，请求机器人先出牌
+          playcardTimer.running=true
 
+          if (bgameOver){
+              if (winnerType!=currRole){
+                 isGameWinner=false
+              }else{
+                 isGameWinner=true
+              }
+              showGameOver()
+          }
       }
     }
+
+
+
 
 //        PropertyAnimation {
 //            id:animFadeIn
@@ -743,8 +895,16 @@ ApplicationWindow {
                    onClicked: {
                        console.log("list view index===", index,playerModel.get(index).nickName)
                        userlist_id.visible=false
-                       console.log(userId.text,"=======>",playerModel.get(index).nickName)
+                       if (otherUser!=""){
+                          var  tmpNick=playerModel.get(index).nickName
+                           if (otherUser!=tmpNick){
+                               console.log("changer user.....old user===>",otherUser,"new user===>",tmpNick)
+                               changeUser(currUser,otherUser)
+                           }
+                       }
                        otherUser=playerModel.get(index).nickName
+                       otherUserType=playerModel.get(index).playerType
+
                        reqPlay(currUser,playerModel.get(index).nickName)
                    }
               }
@@ -756,9 +916,9 @@ ApplicationWindow {
       }
   }
 
-  SoundEffect {
-      id: spawnSound
-      source: "image/bomb-action.wav"
+  MediaPlayer {
+    id: spawnSound
+    source: "image/bomb-action.wav"
   }
 
   Timer{
@@ -766,6 +926,7 @@ ApplicationWindow {
     interval: 100; running: false; repeat: true
     onTriggered:{
        voiceTimer.running=false
+       spawnSound.source=playVoiceFile
        spawnSound.play()
     }
   }
@@ -976,11 +1137,11 @@ ApplicationWindow {
                            Text {
                               id: name33
                               anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(voiceGoDie.waveText)
+                              text: qsTr(voiceFight.waveText)
                            }
                        }
                        onClicked: {
-                            sendVoice(currUser,otherUser,voiceGoDie.waveName)
+                            sendVoice(currUser,otherUser,voiceFight.waveName)
                        }
                    }
 
@@ -1007,6 +1168,32 @@ ApplicationWindow {
                        }
                        onClicked: {
                             sendVoice(currUser,otherUser,voiceBomb.waveName)
+                       }
+                   }
+
+                   MenuItem {
+                       Row{
+                           anchors.verticalCenter: parent.verticalCenter
+                           spacing: 10
+                           Text {
+                              id: name51
+                                text: qsTr(" ")
+                           }
+                           Image {
+                               anchors.verticalCenter: parent.verticalCenter
+                              id: name52
+                               source: "image/shengyin.png"
+                               width: 24
+                               height: 24
+                           }
+                           Text {
+                              id: name53
+                              anchors.verticalCenter: parent.verticalCenter
+                              text: qsTr(voiceTooSlow.waveText)
+                           }
+                       }
+                       onClicked: {
+                            sendVoice(currUser,otherUser,voiceTooSlow.waveName)
                        }
                    }
                }

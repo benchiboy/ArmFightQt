@@ -61,17 +61,18 @@ Item {
         id: img
         source: "image/text-gameover.png"
         anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 15
     }
 
     Text {
         id:playresult
-        text: ">决战结果<"
+        text: "本次大战"
         anchors.top: img.bottom
         anchors.topMargin: 15
         anchors.horizontalCenter: parent.horizontalCenter
         font.bold: true
-        color: "red"
+        color: "black"
         font.pixelSize: 18
         opacity: 0.9
     }
@@ -80,8 +81,7 @@ Item {
             anchors.topMargin: 15
             anchors.top: playresult.bottom
             height: 40
-            anchors.left: parent.left
-            anchors.leftMargin: 80
+            anchors.horizontalCenter: parent.horizontalCenter
             Rectangle{
                 width: parent.width*0.2
                 height: 80
@@ -89,10 +89,9 @@ Item {
                 Column{
                     anchors.fill: parent
                     spacing: 5
-
                     Text {
                         id: name
-                        text: qsTr(gameWinner)
+                        text: qsTr(currUser)
                         font.bold: true
                         color: "white"
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -101,62 +100,18 @@ Item {
 
                     Image {
                         id: winner
-                        source: "image/xiaolian.png"
+                        source: isGameWinner?"image/xiaolian.png":"image/kulian.png"
                           anchors.horizontalCenter: parent.horizontalCenter
                     }
-
 
                     Text {
                         id: info
-                        text: qsTr("此战获得 10个金币")
+                        text: qsTr("此战获得"+goldcoins+"个金币")
                         font.bold: true
                         color: "blue"
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pointSize: 14
                     }
-                }
-            }
-        }
-
-        Row{
-            anchors.topMargin: 15
-            anchors.top: playresult.bottom
-            height: 40
-            anchors.right: parent.right
-            anchors.rightMargin:  80
-            Rectangle{
-                width: parent.width*0.2
-                height: 50
-                color: "red"
-                Column{
-                    anchors.fill: parent
-                    spacing: 5
-
-                    Text {
-                        id: loster
-                        text: qsTr(gameLoster)
-                        font.bold: true
-                        color: "white"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        font.pointSize: 16
-                    }
-
-
-                    Image {
-                        id: kulian
-                        source: "image/kulian.png"
-                          anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        id: info2
-                        text: qsTr("此战获得 10个金币")
-                        font.bold: true
-                        color: "blue"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        font.pointSize: 14
-                    }
-
                 }
             }
         }
@@ -213,7 +168,6 @@ Item {
                             onExited:  {
                                 to_user.source="image/toUser.png"
                             }
-
                         }
                      }
 
@@ -230,10 +184,13 @@ Item {
         source: "image/button-play.png"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 60
+        anchors.horizontalCenter: parent.horizontalCenter
         MouseArea {
             anchors.fill: parent
             onClicked:{
-                gameOverScreen.overButtonClicked()
+                //gameOverScreen.overButtonClicked()
+                //Qt.quit()
+                startGame(currUser,otherUser)
             }
         }
     }

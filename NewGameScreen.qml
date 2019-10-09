@@ -65,14 +65,12 @@ Item {
         source: "image/logo.png"
         anchors.top: parent.top
         anchors.topMargin: 10
+        anchors.horizontalCenter: parent.horizontalCenter
     }
-
-
 
     Row{
         anchors.centerIn: parent
         spacing: 20
-
         Column{
             Image {
                 id:curruser_image
@@ -118,14 +116,13 @@ Item {
                         onExited:  {
                             to_user.source="image/toUser.png"
                         }
-
                     }
                  }
 
             Text {
                 id: other
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: otherUser=="" ? "select":qsTr(otherUser)
+                text: otherUser=="" ? "选择对手":qsTr(otherUser)
                 font.pixelSize: 18
             }
         }
@@ -135,9 +132,12 @@ Item {
         source: "image/button-play.png"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 60
+        anchors.horizontalCenter: parent.horizontalCenter
         MouseArea {
             anchors.fill: parent
             onClicked: newGameScreen.startButtonClicked()
         }
     }
+
+
 }

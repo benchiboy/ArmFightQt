@@ -87,13 +87,20 @@ ItemDelegate {
                 text: nickName
             }
 
-
             Text {
                 color: "red"
                 id: id
                 font.pixelSize: 16
                 text: decoration
             }
+
+            Text {
+                color: "blue"
+                id: playertype
+                font.pixelSize: 16
+                text: playerType
+            }
+
          }
 
       }
