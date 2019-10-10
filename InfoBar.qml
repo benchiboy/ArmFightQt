@@ -60,55 +60,59 @@ Item {
     id: infoBar
 
     property alias jinbiX:        jinbi.x
-
-    Row{
-        spacing: 5
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.left: parent.left
-        anchors.leftMargin: 40
-            Rectangle{
-                width: 32
-                height: 32
-                color: "transparent"
-                Image {
-                    id: xunzhang
-                    anchors.fill:parent
-                    source: "image/xunzhang.png"
+    Rectangle{
+         anchors.top: parent.top
+         height: 50
+         width: parent.width
+         color: "#fff"
+        Row{
+            spacing: 5
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 40
+                Rectangle{
+                    width: 32
+                    height: 32
+                    color: "transparent"
+                    Image {
+                        id: xunzhang
+                        anchors.fill:parent
+                        source: "image/xunzhang.png"
+                    }
                 }
-            }
-            Text {
-                id: xuzhang_count
-                text: qsTr(decorations+"")
-                font.bold: true
-                anchors.verticalCenter: parent.verticalCenter
-          }
-    }
+                Text {
+                    id: xuzhang_count
+                    text: qsTr(decorations+"")
+                    font.bold: true
+                    anchors.verticalCenter: parent.verticalCenter
+              }
+        }
 
-    Row{
-        spacing: 5
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.right: parent.right
-        anchors.rightMargin: 40
-            Rectangle{
-                width: 32
-                height: 32
-                color: "transparent"
-                Image {
-                    id: jinbi
-                    anchors.fill:parent
-                    source: "image/jinbi.png"
+        Row{
+            spacing: 5
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 40
+                Rectangle{
+                    width: 32
+                    height: 32
+                    color: "transparent"
+                    Image {
+                        id: jinbi
+                        anchors.fill:parent
+                        source: "image/jinbi.png"
+                    }
                 }
-            }
-            Text {
-                id: jinbi_count
-                text: qsTr(goldcoins+"")
-                font.bold: true
-                anchors.verticalCenter: parent.verticalCenter
-          }
+                Text {
+                    id: jinbi_count
+                    text: qsTr(goldcoins+"")
+                    font.bold: true
+                    anchors.verticalCenter: parent.verticalCenter
+              }
+        }
     }
-
     Component.onCompleted: {
 
     console.log(jinbi.width)

@@ -14,8 +14,6 @@ ApplicationWindow {
     height: 630
     title: qsTr("Stack")
     SystemPalette { id: activePalette }
-
-
     property bool gameOver: true
     property int score: 0
     property int highScore: 0
@@ -82,9 +80,6 @@ ApplicationWindow {
     property  string  gameWinner:""
     property  string  gameLoster:""
 
-
-
-
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
     property  var       voiceFight: {"waveName":"image/voice_fight.mp3","waveText":"有本事，放马过来..."}
@@ -97,8 +92,8 @@ ApplicationWindow {
     function playCard(fromId,toId,message,score){
         console.log("=====>playCard====>")
         if (!bplay_card){
-            console.log("Wait a another player...")
-            return
+           showMsgBox("对家先出，稍等！")
+           return
         }
         bplay_card=false
         command.type=play_card
@@ -165,23 +160,47 @@ ApplicationWindow {
        gameOver.visible=false
        bgameOver=false
        var  initObj=JSON.parse(initMsg)
-       card_gongbing.count=initObj.gongbing
-       card_paizhang.count=initObj.paizhang
-       card_lianzhang.count=initObj.lianzhang
-       card_yingzhang.count=initObj.yingzhang
-       card_tuanzhang.count=initObj.tuanzhang
-       card_lvzhang.count=initObj.lvzhang
-       card_shizhang.count=initObj.shizhang
-       card_junzhang.count=initObj.junzhang
-       card_siling.count=initObj.siling
-       card_dilei.count=initObj.dilei
-       card_zhadan.count=initObj.zhadan
-       card_junqi.count=initObj.junqi
-       card_dilei.count=initObj.dilei
+       card_gongbing.count=initObj.gongbing.count
+       card_gongbing.enabled=true
+       card_gongbing.border.color=Qt.darker(activePalette.button)
 
-        if (otherUserType==robot_type){
-             reqPlayCard(currUser,otherUser,"RRR",0)
-        }
+        card_paizhang.count=initObj.paizhang.count
+         card_paizhang.enabled=true
+         card_paizhang.border.color=Qt.darker(activePalette.button)
+       card_lianzhang.count=initObj.lianzhang.count
+         card_lianzhang.enabled=true
+         card_lianzhang.border.color=Qt.darker(activePalette.button)
+       card_yingzhang.count=initObj.yingzhang.count
+         card_yingzhang.enabled=true
+         card_yingzhang.border.color=Qt.darker(activePalette.button)
+       card_tuanzhang.count=initObj.tuanzhang.count
+         card_tuanzhang.enabled=true
+         card_tuanzhang.border.color=Qt.darker(activePalette.button)
+       card_lvzhang.count=initObj.lvzhang.count
+         card_lvzhang.enabled=true
+         card_lvzhang.border.color=Qt.darker(activePalette.button)
+       card_shizhang.count=initObj.shizhang.count
+         card_shizhang.enabled=true
+         card_shizhang.border.color=Qt.darker(activePalette.button)
+       card_junzhang.count=initObj.junzhang.count
+         card_junzhang.enabled=true
+         card_junzhang.border.color=Qt.darker(activePalette.button)
+       card_siling.count=initObj.siling.count
+         card_siling.enabled=true
+         card_siling.border.color=Qt.darker(activePalette.button)
+       card_dilei.count=initObj.dilei.count
+         card_dilei.enabled=true
+         card_dilei.border.color=Qt.darker(activePalette.button)
+       card_zhadan.count=initObj.zhadan.count
+         card_zhadan.enabled=true
+         card_zhadan.border.color=Qt.darker(activePalette.button)
+       card_junqi.count=initObj.junqi.count
+         card_junqi.enabled=true
+         card_junqi.border.color=Qt.darker(activePalette.button)
+
+       if (otherUserType==robot_type){
+          firstRobotCard.running=true
+       }
 
     }
 
@@ -251,8 +270,6 @@ ApplicationWindow {
 
     function startGame(fromId,toId){
         console.log("=====>startGame====>")
-
-
         command.type=start_game
         command.fromid=fromId
         command.messge="start play a game"
@@ -301,29 +318,16 @@ ApplicationWindow {
     }
 
 
-    function reqPlayCard(fromId,toId,message,score){
-        console.log("=====>playCard====>")
-        if (!bplay_card){
-            console.log("Wait a another player...")
-            return
-        }
+    function reqPlayCard(fromId,toId,message){
+        console.log("=====>reqPlayCard====>")
         bplay_card=false
         command.type=req_play_card
         command.fromid=fromId
         command.message=message
         command.toid=toId
-        command.score=score
         socket.sendTextMessage(JSON.stringify(command))
     }
 
-
-//    BusyIndicator {
-//        id: busyIndicator
-//        running: true
-//        z:900
-//        anchors.centerIn: parent
-
-//    }
 
     MessageDialog {
         id: playconfirm
@@ -411,9 +415,7 @@ ApplicationWindow {
                         play_curruser_area.border.color="red"
                      }else{
                          play_otheruser_area.border.color="red"
-
                      }
-
                     bplay_card=true
                     break;
                 case req_playyes_resp:
@@ -610,8 +612,18 @@ ApplicationWindow {
           queryResult(currUser,otherUser)
           resultTimer.running=false
       }
-    }
+   }
+   //触发机器人首次出牌
+   Timer{
+      id: firstRobotCard
+      interval: 1000; running: false; repeat: true
+      onTriggered:{
+          reqPlayCard(currUser,otherUser,"机器人首次出牌")
+          firstRobotCard.running=false
+      }
+   }
 
+   //请求机器人出牌
    Timer{
       id: playcardTimer
       interval: 1500; running: false; repeat: true
@@ -619,7 +631,7 @@ ApplicationWindow {
           playcardTimer.running=false
           if (otherUserType==robot_type){
               bplay_card=true
-              reqPlayCard(currUser,otherUser,"工兵",1)
+              reqPlayCard(currUser,otherUser,"触发机器人出牌")
           }
       }
     }
@@ -962,7 +974,7 @@ ApplicationWindow {
    Rectangle{
        id:killarea
        width: parent.width*0.9
-       height: parent.height*0.2
+       height: parent.height*0.25
        anchors.top: parent.top
        radius: 10
        anchors.topMargin: 60
@@ -1026,7 +1038,6 @@ ApplicationWindow {
            anchors.verticalCenter: parent.verticalCenter
            anchors.horizontalCenter: parent.horizontalCenter
            anchors.verticalCenterOffset: 10
-
            spacing: 80
            GButton {
               id: play_curruser
@@ -1044,178 +1055,230 @@ ApplicationWindow {
 
    }
 
+   Rectangle {
+         id: msgMenu
+         visible: false
+         z:500
+         anchors.centerIn: parent
+         width: parent.width*0.7
+         height: 150
+         color:"grey"
+         radius: 6
+         Column{
+             anchors.fill: parent
+             spacing: 5
+             Rectangle {
+                 width:parent.width
+                 height: 30
+                 color: "#ddd"
+                 Row{
+                     anchors.fill: parent
+                     anchors.verticalCenter: parent.verticalCenter
+                     spacing: 10
+                     Text {
+                        id: name11
+                        text: qsTr(" ")
+                     }
+                     Image {
+                         anchors.verticalCenter: parent.verticalCenter
+                         id: name12
+                         source: "image/xiaoxi.png"
+                         width: 24
+                         height: 24
+                     }
+                     Text {
+                        id: name13
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr(messageGreat)
+                     }
+                 }
+                 MouseArea{
+                  anchors.fill: parent
+                  onClicked: {
+                      sendMessage(currUser,otherUser,messageGreat)
+                      msgMenu.visible=false
+                  }
+                 }
+               }
+
+             Rectangle {
+                 width:parent.width
+                 height: 30
+                 color: "#ddd"
+
+                 Row{
+                     anchors.fill: parent
+                     anchors.verticalCenter: parent.verticalCenter
+                     spacing: 10
+                     Text {
+                        id: name21
+                        text: qsTr(" ")
+                     }
+                     Image {
+                         anchors.verticalCenter: parent.verticalCenter
+                         id: name22
+                         source: "image/xiaoxi.png"
+                         width: 24
+                         height: 24
+                     }
+                     Text {
+                        id: name23
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr(messageCommon)
+                     }
+                 }
+                 MouseArea{
+                  anchors.fill: parent
+                  onClicked: {
+                      sendMessage(currUser,otherUser,messageCommon)
+                      msgMenu.visible=false
+                  }
+                 }
+              }
+
+             Rectangle {
+                 width:parent.width
+                 height: 30
+                 color: "#ddd"
+
+                 Row{
+                     anchors.fill: parent
+                     anchors.verticalCenter: parent.verticalCenter
+                     spacing: 10
+                     Text {
+                        id: name31
+                        text: qsTr(" ")
+                     }
+                     Image {
+                         anchors.verticalCenter: parent.verticalCenter
+                         id: name32
+                         source: "image/shengyin.png"
+                         width: 24
+                         height: 24
+                     }
+                     Text {
+                        id: name33
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr(voiceFight.waveText)
+                     }
+                 }
+                 MouseArea{
+                  anchors.fill: parent
+                  onClicked: {
+                      sendVoice(currUser,otherUser,voiceFight.waveName)
+                      msgMenu.visible=false
+                  }
+                 }
+              }
+
+             Rectangle {
+                 width:parent.width
+                 height: 30
+                 color: "#ddd"
+
+                 Row{
+                     anchors.fill: parent
+                     anchors.verticalCenter: parent.verticalCenter
+                     spacing: 10
+                     Text {
+                        id: name41
+                        text: qsTr(" ")
+                     }
+                     Image {
+                         anchors.verticalCenter: parent.verticalCenter
+                         id: name42
+                         source: "image/shengyin.png"
+                         width: 24
+                         height: 24
+                     }
+                     Text {
+                        id: name43
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr(voiceBomb.waveText)
+                     }
+                 }
+                 MouseArea{
+                  anchors.fill: parent
+                  onClicked: {
+                      sendVoice(currUser,otherUser,voiceBomb.waveName)
+                      msgMenu.visible=false
+                  }
+                 }
+              }
+
+             Rectangle {
+                 width:parent.width
+                 height: 30
+                 color: "#ddd"
+
+                 Row{
+                     anchors.fill: parent
+                     anchors.verticalCenter: parent.verticalCenter
+                     spacing: 10
+                     Text {
+                        id: name51
+                        text: qsTr(" ")
+                     }
+                     Image {
+                         anchors.verticalCenter: parent.verticalCenter
+                         id: name52
+                         source: "image/shengyin.png"
+                         width: 24
+                         height: 24
+                     }
+                     Text {
+                        id: name53
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                       text: qsTr(voiceTooSlow.waveText)
+                     }
+                 }
+                 MouseArea{
+                  anchors.fill: parent
+                  onClicked: {
+                      sendVoice(currUser,otherUser,voiceTooSlow.waveName)
+                      msgMenu.visible=false
+                  }
+                 }
+          }
+         }
+    }
+
    Rectangle{
         width: parent.width*0.9
         height: parent.height*0.1
         color: "transparent"
         anchors.top: parent.top
-        anchors.topMargin: 200
+        anchors.topMargin: 260
         anchors.horizontalCenter: parent.horizontalCenter
-        RowLayout{
+       RowLayout{
             anchors.centerIn:  parent
             spacing: 30
-
             GButton {
                 id:sendmsg
                 text: "发消息"
                 count: 0
                 onClicked: {
-                    onClicked: menu.open()
+                   msgMenu.visible=true
                 }
             }
-
-            Menu {
-                   id: menu
-                   anchors.centerIn: parent
-                   MenuItem {
-                       Row{
-                           anchors.verticalCenter: parent.verticalCenter
-                           spacing: 10
-                           Text {
-                              id: name11
-                                text: qsTr(" ")
-                           }
-                           Image {
-                               anchors.verticalCenter: parent.verticalCenter
-                               id: name12
-                               source: "image/xiaoxi.png"
-                               width: 24
-                               height: 24
-                           }
-                           Text {
-                              id: name13
-                              anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(messageCommon)
-                           }
-                       }
-                       onClicked: {
-                            sendMessage(currUser,otherUser,messageCommon)
-                       }
-                   }
-
-                   MenuItem {
-                       Row{
-                           anchors.verticalCenter: parent.verticalCenter
-                           spacing: 10
-                           Text {
-                              id: name21
-                                text: qsTr(" ")
-                           }
-                           Image {
-                               anchors.verticalCenter: parent.verticalCenter
-                              id: name22
-                               source: "image/xiaoxi.png"
-                               width: 24
-                               height: 24
-                           }
-                           Text {
-                              id: name23
-                              anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(messageGreat)
-                           }
-                       }
-                       onClicked: {
-                            sendMessage(currUser,otherUser,messageGreat)
-                       }
-                   }
-
-                   MenuItem {
-                       Row{
-                           anchors.verticalCenter: parent.verticalCenter
-                           spacing: 10
-                           Text {
-                              id: name31
-                                text: qsTr(" ")
-                           }
-                           Image {
-                               anchors.verticalCenter: parent.verticalCenter
-                              id: name32
-                               source: "image/shengyin.png"
-                               width: 24
-                               height: 24
-                           }
-                           Text {
-                              id: name33
-                              anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(voiceFight.waveText)
-                           }
-                       }
-                       onClicked: {
-                            sendVoice(currUser,otherUser,voiceFight.waveName)
-                       }
-                   }
-
-                   MenuItem {
-                       Row{
-                           anchors.verticalCenter: parent.verticalCenter
-                           spacing: 10
-                           Text {
-                              id: name41
-                                text: qsTr(" ")
-                           }
-                           Image {
-                               anchors.verticalCenter: parent.verticalCenter
-                              id: name42
-                               source: "image/shengyin.png"
-                               width: 24
-                               height: 24
-                           }
-                           Text {
-                              id: name43
-                              anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(voiceBomb.waveText)
-                           }
-                       }
-                       onClicked: {
-                            sendVoice(currUser,otherUser,voiceBomb.waveName)
-                       }
-                   }
-
-                   MenuItem {
-                       Row{
-                           anchors.verticalCenter: parent.verticalCenter
-                           spacing: 10
-                           Text {
-                              id: name51
-                                text: qsTr(" ")
-                           }
-                           Image {
-                               anchors.verticalCenter: parent.verticalCenter
-                              id: name52
-                               source: "image/shengyin.png"
-                               width: 24
-                               height: 24
-                           }
-                           Text {
-                              id: name53
-                              anchors.verticalCenter: parent.verticalCenter
-                              text: qsTr(voiceTooSlow.waveText)
-                           }
-                       }
-                       onClicked: {
-                            sendVoice(currUser,otherUser,voiceTooSlow.waveName)
-                       }
-                   }
-               }
-
             GButton {
                 id:wetie
                 text: "求平局"
                 count: 0
                 onClicked: {
-                 //playm_area.border.color="red"
-                  // sendGiveup(currUser,otherUser)
-                   // voiceTimer.running=true
                     coinLaunch.start()
                 }
             }
-
             GButton {
                 id:ifailed
                 text: "我认输"
                 count: 0
                 onClicked: {
-                 //playm_area.border.color="red"
                    sendGiveup(currUser,otherUser)
                 }
             }
@@ -1224,20 +1287,20 @@ ApplicationWindow {
     }
 
    Rectangle{
-        width: parent.width*0.8
+        width: parent.width*0.9
         height: parent.height*0.3
         anchors.top: parent.top
-        anchors.topMargin: 350
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: 430
         color: "transparent"
-         GridLayout{
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        GridLayout{
             id:gridcontainer
-            anchors.fill: parent
-            anchors.centerIn: parent
+            anchors.centerIn:  parent
             columns: 4
             rows: 4
-            columnSpacing: 10
-            rowSpacing: 1
+            columnSpacing: 20
+            rowSpacing: 10
 
             GButton {
                 id:card_gongbing
@@ -1345,6 +1408,7 @@ ApplicationWindow {
         gameOver.visible=false
     }
   }
+
 
 
 }
