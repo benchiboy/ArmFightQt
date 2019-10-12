@@ -135,6 +135,7 @@
         <file>image/voice_bomb.mp3</file>
         <file>image/voice_tooslow.mp3</file>
         <file>image/voice_fight.mp3</file>
+        <file>image/guanbi.png</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

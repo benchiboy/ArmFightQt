@@ -70,7 +70,7 @@ ApplicationWindow {
 
     property  string  currUser:""
     property  string  otherUser:""
-    property  int     otherUserType:0
+    property  int     otherUserType:2
     property  string  currCard:""
     property  string  winnerType:""
     property  string  currRole:""
@@ -350,7 +350,9 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-       url: "ws://127.0.0.1:8080/echo"
+       //url: "ws://212.64.29.57:9080/echo"
+       url: "ws://127.0.0.1:9080/echo"
+
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
            var recvMsg=JSON.parse(message)
@@ -406,11 +408,10 @@ ApplicationWindow {
                     console.log("Recv req_play_resp===>")
                     break;
                 case req_playyes:
-                    console.log("Recv req_playyes===>")
-                    otherUser=recvMsg.fromid
-                    //发起方先出
-                    showMsgBox("对方已经同意,开始游戏吧!")
-
+                     console.log("Recv req_playyes===>")
+                     otherUser=recvMsg.fromid
+                     //发起方先出
+                     showMsgBox("对方已经同意,开始游戏吧!")
                      if (otherUserType==human_type){
                         play_curruser_area.border.color="red"
                      }else{
@@ -421,8 +422,11 @@ ApplicationWindow {
                 case req_playyes_resp:
                     console.log("Recv req_playyes_resp===>")
                     //主先出牌
+                     console.log("=======>",otherUserType)
                     if (otherUserType==human_type){
+                         console.log("=======>",otherUserType)
                          play_otheruser_area.border.color="red"
+                         play_curruser_area.border.color="transparent"
                     }else{
                         play_curruser_area.border.color="red"
                     }
@@ -452,10 +456,10 @@ ApplicationWindow {
                      bplay_card=true
                     break;
                 case play_card_resp:
-                     console.log("Recv play_card_resp===>")
-                     //显示下一步谁出牌
-                     play_curruser_area.border.color="transparent"
-                     play_otheruser_area.border.color="red"
+                    console.log("Recv play_card_resp===>")
+                    //显示下一步谁出牌
+                    play_curruser_area.border.color="transparent"
+                    play_otheruser_area.border.color="red"
 
                     if ( recvMsg.role=="M"){
                         play_curruser.opacity=1
@@ -528,19 +532,22 @@ ApplicationWindow {
                 default:
                     console.log("Recv error command===>")
            }
-
        }
 
        onStatusChanged: if (socket.status == WebSocket.Error) {
                             console.log("Error: " + socket.errorString)
+                            socket.active=false
+
                         } else if (socket.status == WebSocket.Open) {
                             console.log("socket connected successful!")
                             signIn(singIn.userText)
-
                         } else if (socket.status == WebSocket.Closed) {
                             socket.active=false
                             console.log("socket closed")
-                           // messageBox.text += "\nSocket closed"
+                        } else{
+
+                            socket.active=false
+                            console.log( socket.errorString)
                         }
        active: false
      }
@@ -597,6 +604,15 @@ ApplicationWindow {
    SigninScreen{
         id:singIn
         visible: true
+        onStartSignin: {
+            if (userText==""){
+                showMsgBox("登录账号不能为空！")
+                return
+            }
+            if (socket.active==false){
+                socket.active=true
+            }
+        }
    }
 
    SignupScreen{
@@ -885,8 +901,69 @@ ApplicationWindow {
       height: parent.height
       anchors.centerIn: parent
       z:2000
-
       Rectangle{
+          Image {
+              id: closeuser
+              width: 24
+              height: 24
+              z:600
+              source: "image/guanbi.png"
+              anchors.right: parent.right
+              anchors.rightMargin: -10
+              anchors.top: parent.top
+              anchors.topMargin: -10
+              MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    userlist_id.visible=false
+                }
+              }
+          }
+
+          Rectangle{
+              anchors.top: parent.top
+              anchors.topMargin: 0
+              color: "lightblue"
+              width: parent.width
+              height: 40
+              Row{
+                  anchors.centerIn: parent
+                  spacing: 70
+                  Text {
+                      id: user_human
+                      text: qsTr("人类选手")
+                      font.underline: true
+                      font.bold:true
+                      MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            user_human.color="red"
+                            user_robot.color="black"
+                            user_human.font.bold= true
+                            user_human.font.underline=true
+                            user_robot.font.underline=false
+                        }
+                      }
+                  }
+                  Text {
+                      id: user_robot
+                      text: qsTr("机器选手")
+                        color: "red"
+                        MouseArea{
+                          anchors.fill:parent
+                          onClicked: {
+                              user_human.color="black"
+                              user_human.font.underline=false
+                              user_robot.color="red"
+                              user_robot.font.bold= true
+                              user_robot.font.underline=true
+
+                          }
+                        }
+                  }
+              }
+          }
+
 
       radius: 5
       color: "white"
@@ -897,7 +974,7 @@ ApplicationWindow {
       ListView {
               id: listView
               anchors.top: parent.top
-              anchors.topMargin: 15
+              anchors.topMargin: 40
               width: parent.width
               highlightRangeMode: ListView.StrictlyEnforceRange
               height:parent.height
@@ -916,7 +993,6 @@ ApplicationWindow {
                        }
                        otherUser=playerModel.get(index).nickName
                        otherUserType=playerModel.get(index).playerType
-
                        reqPlay(currUser,playerModel.get(index).nickName)
                    }
               }

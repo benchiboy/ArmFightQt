@@ -58,7 +58,7 @@ Item {
         z: 101
         opacity: 0.9
         visible: true;
-
+        signal startSignin
         property alias userText:        userId.text
 
 //          LogoAnimation {
@@ -155,15 +155,8 @@ Item {
                 text: "登录"
                 count: 0
                 onClicked: {
-                    if (userId.text==""){
-                        showMsgBox("登录账号不能为空！")
-                        return
-                    }
-                    if (socket.active==false){
-                        socket.active=true
-                     }else{
-                    }
-                    //signIn(userId.text)
+                    popup.startSignin()
+
                 }
             }
 
