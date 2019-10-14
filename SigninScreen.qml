@@ -124,9 +124,9 @@ Item {
                         anchors.fill:parent
                         onClicked: {
                             console.log("reguser......")
-//                            singIn.visible=false
-//                            newGame.visible=false
-//                            singUp.visible=true
+                            singIn.visible=false
+                            newGame.visible=false
+                            singUp.visible=true
                         }
                     }
                 }

@@ -79,6 +79,7 @@ ApplicationWindow {
 
     property  string  gameWinner:""
     property  string  gameLoster:""
+    property  string  glServerUrl : "http://10.89.4.231:9080/"
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
