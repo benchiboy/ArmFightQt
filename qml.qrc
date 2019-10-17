@@ -136,6 +136,25 @@
         <file>image/voice_tooslow.mp3</file>
         <file>image/voice_fight.mp3</file>
         <file>image/guanbi.png</file>
+        <file>SignupResult.qml</file>
+        <file>ResetpwdScreen.qml</file>
+        <file>ResetpwdResult.qml</file>
+        <file>image/chenggong.png</file>
+        <file>ResetpwdForm.qml</file>
+        <file>SignupForm.qml</file>
+        <file>image/zhu.png</file>
+        <file>image/gou.png</file>
+        <file>image/ji.png</file>
+        <file>image/houzi.png</file>
+        <file>image/yang.png</file>
+        <file>image/ma.png</file>
+        <file>image/she.png</file>
+        <file>image/long.png</file>
+        <file>image/tuzi.png</file>
+        <file>image/hu.png</file>
+        <file>image/niu.png</file>
+        <file>image/laoshu.png</file>
+        <file>HeadButton.qml</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

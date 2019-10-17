@@ -33,8 +33,13 @@ ApplicationWindow {
     property  int  query_result_resp: 2012
     property  int  send_msg: 1003
     property  int  send_msg_resp: 2003
+
     property  int  get_users: 1004
     property  int  get_users_resp: 2004
+
+    property  int  get_robots: 1080
+    property  int  get_robots_resp: 2080
+
     property  int  req_play: 1005
     property  int  req_play_resp: 2005
     property  int  req_playyes: 1006
@@ -77,9 +82,15 @@ ApplicationWindow {
     property  int     goldcoins: 0
     property  int     decorations: 0
 
+    property  string  nickName:""
+    property  string  userPasswd:""
+
+
     property  string  gameWinner:""
     property  string  gameLoster:""
-    property  string  glServerUrl : "http://10.89.4.231:9080/"
+    property  string  glServerUrl : "http://212.64.29.57:9080/"
+
+    //property  string  glServerUrl : "http://localhost:9080/"
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
@@ -132,14 +143,15 @@ ApplicationWindow {
         socket.sendTextMessage(JSON.stringify(command))
     }
 
-    function signIn(id){
+    function signIn(nickName,password){
         console.log("=====>signIn====>")
-        currUser=id
+        console.log("signUser===>",nickName,password)
+        currUser=nickName
         command.type=sign_in
         command.userid=Math.random(100)
-        command.nickname=id
-        command.fromid=id
-        command.messge="signin"
+        command.nickname=nickName
+        command.fromid=nickName
+        command.message=password
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -149,7 +161,7 @@ ApplicationWindow {
         command.type=init_data
         command.userid=Math.random(100)
         command.nickname=id
-        command.messge="init data..."
+        command.message="init data..."
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -211,6 +223,12 @@ ApplicationWindow {
         socket.sendTextMessage(JSON.stringify(command))
     }
 
+    function getRobots(){
+        console.log("=====>getRobots====>")
+        command.type=get_robots
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
     function getUsersResult(message){
         console.log("=====>getUsersResult====>")
         playerModel.clear()
@@ -231,7 +249,7 @@ ApplicationWindow {
         console.log("=====>reqPlay====>")
         command.type=req_play
         command.fromid=fromId
-        command.messge="request play a game"
+        command.message="request play a game"
         command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
@@ -240,7 +258,7 @@ ApplicationWindow {
         console.log("=====>reqPlayYes====>")
         command.type=req_playyes
         command.fromid=fromId
-        command.messge="好的，一起玩吧"
+        command.message="好的，一起玩吧"
         command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
@@ -249,7 +267,7 @@ ApplicationWindow {
         console.log("=====>reqPlayNo====>")
         command.type=req_playno
         command.fromid=fromId
-        command.messge="他拒绝了你的请求"
+        command.message="他拒绝了你的请求"
         command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
@@ -273,7 +291,7 @@ ApplicationWindow {
         console.log("=====>startGame====>")
         command.type=start_game
         command.fromid=fromId
-        command.messge="start play a game"
+        command.message="start play a game"
         command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
@@ -292,7 +310,7 @@ ApplicationWindow {
 
     function showNewGame(){
         console.log("=====>showNewGame====>")
-        singIn.visible=false
+        signInScreen.visible=false
         newGame.visible=true
     }
 
@@ -313,7 +331,7 @@ ApplicationWindow {
         console.log("=====>changeUser====>")
         command.type=change_user
         command.fromid=fromId
-        command.messge="改变用户请求"
+        command.message="改变用户请求"
         command.toid=toId
         socket.sendTextMessage(JSON.stringify(command))
     }
@@ -351,8 +369,8 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-       //url: "ws://212.64.29.57:9080/echo"
-       url: "ws://127.0.0.1:9080/echo"
+       url: "ws://212.64.29.57:9080/echo"
+      // url: "ws://127.0.0.1:9080/echo"
 
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
@@ -372,13 +390,19 @@ ApplicationWindow {
                     console.log("Recv get_users_resp===>")
                     getUsersResult(recvMsg.message);
                     break;
+
+                case get_robots_resp:
+                    console.log("Recv get_robots_resp===>")
+                    getUsersResult(recvMsg.message);
+                    break;
+
                 case sign_in_resp:
                     console.log("Recv sign_in_resp===>")
                      if (recvMsg.success){
                          currUser=recvMsg.fromid
                          showNewGame()
                       }else{
-                        signresult.text=recvMsg.message
+                       showMsgBox(recvMsg.message)
                      }
                     break;
                 case init_data_resp:
@@ -541,7 +565,7 @@ ApplicationWindow {
 
                         } else if (socket.status == WebSocket.Open) {
                             console.log("socket connected successful!")
-                            signIn(singIn.userText)
+                            signIn(nickName,userPasswd)
                         } else if (socket.status == WebSocket.Closed) {
                             socket.active=false
                             console.log("socket closed")
@@ -602,24 +626,7 @@ ApplicationWindow {
         height: 1
    }
 
-   SigninScreen{
-        id:singIn
-        visible: true
-        onStartSignin: {
-            if (userText==""){
-                showMsgBox("登录账号不能为空！")
-                return
-            }
-            if (socket.active==false){
-                socket.active=true
-            }
-        }
-   }
 
-   SignupScreen{
-        id:singUp
-        visible: false
-   }
 
    Timer{
       id: resultTimer
@@ -639,7 +646,6 @@ ApplicationWindow {
           firstRobotCard.running=false
       }
    }
-
    //请求机器人出牌
    Timer{
       id: playcardTimer
@@ -652,9 +658,8 @@ ApplicationWindow {
           }
       }
     }
-
-
-    Timer{
+   //清理牌面事件
+   Timer{
       id: clearTimer
       interval: 1000; running: false; repeat: true
       onTriggered:{
@@ -879,7 +884,6 @@ ApplicationWindow {
     }
   }
 
-
   NewGameScreen{
     id:newGame
     anchors.fill: parent
@@ -893,6 +897,23 @@ ApplicationWindow {
         startGame(currUser,otherUser)
     }
   }
+
+  SigninScreen{
+       id:signInScreen
+       visible: true
+
+  }
+
+  SignupScreen{
+     id:signUp
+     visible: false
+  }
+
+  ResetpwdScreen{
+     id:resetPwd
+     visible: false
+  }
+
 
 
   Item{
@@ -943,6 +964,7 @@ ApplicationWindow {
                             user_human.font.bold= true
                             user_human.font.underline=true
                             user_robot.font.underline=false
+                            getUsers()
                         }
                       }
                   }
@@ -958,7 +980,7 @@ ApplicationWindow {
                               user_robot.color="red"
                               user_robot.font.bold= true
                               user_robot.font.underline=true
-
+                              getRobots()
                           }
                         }
                   }
@@ -1480,9 +1502,10 @@ ApplicationWindow {
 
     Component.onCompleted: {
         gameMain.visible=false
-        singIn.visible=true
+        signInScreen.visible=true
         newGame.visible=false
         gameOver.visible=false
+
     }
   }
 
