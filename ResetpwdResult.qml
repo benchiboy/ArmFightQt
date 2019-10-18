@@ -35,8 +35,6 @@ Page {
                }
         }
 
-
-
         Row{
            anchors.top: parent.top
            anchors.topMargin: 400
@@ -53,7 +51,7 @@ Page {
                    }
                    background: Rectangle {
                        implicitWidth: 250
-                       implicitHeight: 40
+                       implicitHeight: 50
                        color:  "green"
                        border.color: button.down ? "red" : "#f6f6f6"
                        border.width: 1

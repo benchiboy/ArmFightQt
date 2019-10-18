@@ -106,7 +106,7 @@ Page {
                        ListElement { text: "你的生日";  }
                    }
                    implicitWidth: 250
-                   implicitHeight: 40
+                   implicitHeight: 50
                    background: Rectangle{
                        radius: 10
                        color: resetPwdProblem.enabled ? "transparent" : "#353637"

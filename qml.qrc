@@ -155,6 +155,10 @@
         <file>image/niu.png</file>
         <file>image/laoshu.png</file>
         <file>HeadButton.qml</file>
+        <file>image/jiqiren.png</file>
+        <file>image/menu.png</file>
+        <file>HelpBox.qml</file>
+        <file>WebView.qml</file>
     </qresource>
     <qresource prefix="/componet"/>
 </RCC>

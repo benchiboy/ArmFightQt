@@ -153,7 +153,7 @@ Page {
                     placeholderText: qsTr("预留的答案")
                     background: Rectangle {
                         implicitWidth: 250
-                        implicitHeight: 40
+                        implicitHeight: 50
                         radius: 10
                         color: resetPwdAnswer.enabled ? "transparent" : "#353637"
                         border.color: resetPwdAnswer.enabled ? "#21be2b" : "transparent"
@@ -177,9 +177,9 @@ Page {
                        }
                        background: Rectangle {
                            implicitWidth: 250
-                           implicitHeight: 40
+                           implicitHeight: 50
                            color:  "green"
-                           border.color: button1.down ? "red" : "#f6f6f6"
+                           border.color: resetNextButton.down ? "red" : "#f6f6f6"
                            border.width: 1
                            radius: 4
                        }

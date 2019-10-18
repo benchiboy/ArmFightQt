@@ -50,72 +50,15 @@
 
 import QtQuick 2.0
 import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.3
+import QtWebView 1.1
 
-// This is the first screen.
-// It shows the logo and emit a startButtonClicked signal
-// when the user press the "PLAY" button.
-
-Item {
-    id: infoBar
-    property alias jinbiX:        jinbi.x
-    Rectangle{
-         anchors.top: parent.top
-         height: 50
-         width: parent.width
-         color: "#fff"
-        Row{
-            spacing: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 40
-                Rectangle{
-                    width: 32
-                    height: 32
-                    color: "transparent"
-                    Image {
-                        id: xunzhang
-                        anchors.fill:parent
-                        source: "image/xunzhang.png"
-                    }
-                }
-                Text {
-                    id: xuzhang_count
-                    text: qsTr(decorations+"")
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-              }
-        }
-
-        Row{
-            spacing: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-                Rectangle{
-                    width: 32
-                    height: 32
-                    color: "transparent"
-                    Image {
-                        id: jinbi
-                        anchors.fill:parent
-                        source: "image/jinbi.png"
-                    }
-                }
-                Text {
-                    id: jinbi_count
-                    text: qsTr(goldcoins+"")
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-              }
-        }
-    }
-    Component.onCompleted: {
-
-    console.log(jinbi.width)
-         console.log(jinbi.left)
-    }
-
-}
+WebView{
+       id:webView
+       z:9000
+       anchors.centerIn: parent
+       width: parent.width-10
+       height: parent.height-10
+       url:"https://www.sina.com";
+       onLoadProgressChanged: {
+       }
+   }

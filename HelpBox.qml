@@ -52,70 +52,65 @@ import QtQuick 2.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.3
 
-// This is the first screen.
-// It shows the logo and emit a startButtonClicked signal
-// when the user press the "PLAY" button.
-
-Item {
-    id: infoBar
-    property alias jinbiX:        jinbi.x
+Popup {
+    id: helpBox
+    anchors.centerIn: parent
+    width: parent.width*0.9
+    height: parent.height*0.7
     Rectangle{
-         anchors.top: parent.top
-         height: 50
-         width: parent.width
-         color: "#fff"
-        Row{
-            spacing: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 40
-                Rectangle{
-                    width: 32
-                    height: 32
-                    color: "transparent"
-                    Image {
-                        id: xunzhang
-                        anchors.fill:parent
-                        source: "image/xunzhang.png"
-                    }
-                }
-                Text {
-                    id: xuzhang_count
-                    text: qsTr(decorations+"")
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-              }
-        }
+       anchors.fill: parent
+       Column{
+           anchors.fill: parent
+           spacing: 20
+           Text {
+               id: name0
+               font.bold: true
+               anchors.horizontalCenter: parent.horizontalCenter
+               font.pixelSize: 16
+               text: qsTr("游戏规则")
+           }
 
-        Row{
-            spacing: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-                Rectangle{
-                    width: 32
-                    height: 32
-                    color: "transparent"
-                    Image {
-                        id: jinbi
-                        anchors.fill:parent
-                        source: "image/jinbi.png"
-                    }
-                }
-                Text {
-                    id: jinbi_count
-                    text: qsTr(goldcoins+"")
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-              }
-        }
+
+           Text {
+               id: name01
+               font.pixelSize: 16
+               width: parent.width-10
+               text: qsTr("游戏支持双人对战和机器人对战模式，遵循公平公正与趣味协同的原则：")
+               wrapMode: Text.WrapAnywhere
+           }
+
+           Text {
+               id: name
+               font.pixelSize: 16
+               width: parent.width-10
+               text: qsTr("1、司令>军长>师长>旅长>团长>营长>连长>排长>工兵")
+               wrapMode: Text.WrapAnywhere
+           }
+
+           Text {
+               id: name2
+               font.pixelSize: 16
+               width: parent.width-10
+               text: qsTr("2、工兵吃地雷,炸弹地雷与任何棋子对战都是同归于尽")
+               wrapMode: Text.WrapAnywhere
+           }
+
+           Text {
+               id: name1
+               font.pixelSize: 16
+               width: parent.width-10
+               text: qsTr("3、军旗吃炸弹和地雷")
+               wrapMode: Text.WrapAnywhere
+           }
+
+           Text {
+               id: name4
+               font.pixelSize: 16
+               width: parent.width-10
+               text: qsTr("4、对战胜利一次奖励一个金币,金币大于100后，系统自动兑换一个军章")
+               wrapMode: Text.WrapAnywhere
+           }
+       }
+
     }
-    Component.onCompleted: {
-
-    console.log(jinbi.width)
-         console.log(jinbi.left)
-    }
-
 }

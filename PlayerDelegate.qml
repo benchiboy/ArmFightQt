@@ -59,7 +59,6 @@ ItemDelegate {
     signal clicked
 
     Rectangle {
-
             height: parent.height-1
             width: parent.width
             color: mouse.pressed ? "grey" : "#ddd"
@@ -70,36 +69,58 @@ ItemDelegate {
             }
 
             Row{
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 20
-            Image {
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 20
 
-                id: headurl
-                source: "image/lifes.png"
-            }
+                Image {
+                    id: headurl
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 26
+                    height: 26
+                    source: userHeadImage
+                }
 
-            Text {
-                color: "red"
-                id: name
-                font.pixelSize: 16
-                text: nickName
-            }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "black"
+                    width: parent.width*0.3
+                    id: name
+                    font.pixelSize: 14
+                    text: nickName
+                }
 
-            Text {
-                color: "red"
-                id: id
-                font.pixelSize: 16
-                text: decoration
-            }
+                Text {
+                    color: userStatus=="1"?"green":(userStatus=="2"?"red":"black")
+                    anchors.verticalCenter: parent.verticalCenter
+                    id: playerstatus
+                    width: parent.width*0.2
+                    font.pixelSize: 14
+                    text:  userStatus=="1"?"空闲":(userStatus=="2"?"战斗中":"不在线")
+                }
 
-            Text {
-                color: "blue"
-                id: playertype
-                font.pixelSize: 16
-                text: playerType
-            }
+                Rectangle{
+                    height: 40
+                    width: parent.width*0.2
+                    color: "transparent"
+                    Row{
+                        anchors.fill: parent
+                        anchors.verticalCenter: parent.verticalCenter
+                        Image {
+                            id: xunzhang
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 24
+                            height: 24
+                            source: "image/xunzhang.png"
+                        }
+                        Label{
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "0"
+                        }
+                    }
+
+                }
 
          }
 

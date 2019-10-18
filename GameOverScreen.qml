@@ -129,7 +129,7 @@ Item {
                     width: 50
                     height: 50
                     anchors.horizontalCenter: parent.horizontalCenter
-                    source: "image/user.png"
+                    source: currUserImage
                 }
                 Text {
                     id: name11
@@ -153,20 +153,20 @@ Item {
                     height: 50
                         anchors.horizontalCenter: parent.horizontalCenter
                         id:to_user
-                        source: "image/toUser.png"
+                        source: otherUserImage
                         MouseArea{
                             id:touser_mouse
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
                                 userlist_id.visible=true
-                                getUsers()
+                                getRobots()
                             }
                             onEntered: {
-                                to_user.source="image/user.png"
+                               // to_user.source="image/user.png"
                             }
                             onExited:  {
-                                to_user.source="image/toUser.png"
+                               // to_user.source="image/toUser.png"
                             }
                         }
                      }

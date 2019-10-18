@@ -75,6 +75,10 @@ ApplicationWindow {
 
     property  string  currUser:""
     property  string  otherUser:""
+
+    property  string  currUserImage:""
+    property  string  otherUserImage:""
+
     property  int     otherUserType:2
     property  string  currCard:""
     property  string  winnerType:""
@@ -88,15 +92,15 @@ ApplicationWindow {
 
     property  string  gameWinner:""
     property  string  gameLoster:""
-    property  string  glServerUrl : "http://212.64.29.57:9080/"
+    //property  string  glServerUrl : "http://212.64.29.57:9080/"
 
-    //property  string  glServerUrl : "http://localhost:9080/"
+    property  string  glServerUrl : "http://localhost:9080/"
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
     property  var       voiceFight: {"waveName":"image/voice_fight.mp3","waveText":"有本事，放马过来..."}
     property  var       voiceBomb:  {"waveName":"image/voice_bomb.mp3","waveText":"小心地雷炸弹！"}
-    property  var       voiceTooSlow:  {"waveName":"image/voice_tooslow.mp3","waveText":"你太慢了，赶快出棋"}
+    property  var       voiceTooSlow:  {"waveName":"image/voice_tooslow.mp3","waveText":"你太慢了，赶快出棋!"}
     property  string    playVoiceFile:""
     property  var   command: { "type": 0, "userid": "" }
 
@@ -235,12 +239,13 @@ ApplicationWindow {
         var  msgObj=JSON.parse(message)
         console.log(msgObj)
         for(var key in msgObj) {
-            console.log(key, msgObj[key].status);
-            console.log("玩家的类型", msgObj[key].playertype);
+            console.log(key, msgObj[key].avatar);
+            console.log("玩家状态", msgObj[key].status);
             playerModel.append( {"userId":msgObj[key].userid,
                                  "nickName":msgObj[key].nickname,
-                                 "decoration":msgObj[key].decoration,
-                                 "playerType":msgObj[key].playertype
+                                 "userHeadImage":msgObj[key].avatar,
+                                 "userStatus":msgObj[key].status,
+                                 "playerType":msgObj[key].playertype,
                                });
         }
     }
@@ -249,8 +254,8 @@ ApplicationWindow {
         console.log("=====>reqPlay====>")
         command.type=req_play
         command.fromid=fromId
-        command.message="request play a game"
         command.toid=toId
+        command.message=currUserImage
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -369,8 +374,8 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-       url: "ws://212.64.29.57:9080/echo"
-      // url: "ws://127.0.0.1:9080/echo"
+      // url: "ws://212.64.29.57:9080/echo"
+       url: "ws://127.0.0.1:9080/echo"
 
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
@@ -395,14 +400,15 @@ ApplicationWindow {
                     console.log("Recv get_robots_resp===>")
                     getUsersResult(recvMsg.message);
                     break;
-
                 case sign_in_resp:
                     console.log("Recv sign_in_resp===>")
-                     if (recvMsg.success){
-                         currUser=recvMsg.fromid
-                         showNewGame()
-                      }else{
-                       showMsgBox(recvMsg.message)
+                    if (recvMsg.success){
+                        currUser=recvMsg.fromid
+                        console.log("UserImage==>",recvMsg.message)
+                        currUserImage=recvMsg.message
+                        showNewGame()
+                     }else{
+                        showMsgBox(recvMsg.message)
                      }
                     break;
                 case init_data_resp:
@@ -428,6 +434,7 @@ ApplicationWindow {
                     console.log("Recv req_play===>")
                     otherUser=recvMsg.fromid
                     playconfirm.visible=true
+                    otherUserImage=recvMsg.message
                     break;
                 case req_play_resp:
                     console.log("Recv req_play_resp===>")
@@ -950,39 +957,20 @@ ApplicationWindow {
               height: 40
               Row{
                   anchors.centerIn: parent
-                  spacing: 70
-                  Text {
-                      id: user_human
-                      text: qsTr("人类选手")
-                      font.underline: true
-                      font.bold:true
-                      MouseArea{
-                        anchors.fill:parent
+                  TabBar{
+                      TabButton{
+                        text: "机器选手"
                         onClicked: {
-                            user_human.color="red"
-                            user_robot.color="black"
-                            user_human.font.bold= true
-                            user_human.font.underline=true
-                            user_robot.font.underline=false
-                            getUsers()
+                        getRobots()
                         }
                       }
-                  }
-                  Text {
-                      id: user_robot
-                      text: qsTr("机器选手")
-                        color: "red"
-                        MouseArea{
-                          anchors.fill:parent
-                          onClicked: {
-                              user_human.color="black"
-                              user_human.font.underline=false
-                              user_robot.color="red"
-                              user_robot.font.bold= true
-                              user_robot.font.underline=true
-                              getRobots()
-                          }
+                      TabButton{
+                        text: "人类选手"
+
+                        onClicked: {
+                           getUsers()
                         }
+                      }
                   }
               }
           }
@@ -1006,6 +994,10 @@ ApplicationWindow {
                    width: listView.width
                    onClicked: {
                        console.log("list view index===", index,playerModel.get(index).nickName)
+                       //
+                       if (playerModel.get(index).userStatus==2){
+                            return
+                       }
                        userlist_id.visible=false
                        if (otherUser!=""){
                           var  tmpNick=playerModel.get(index).nickName
@@ -1016,6 +1008,7 @@ ApplicationWindow {
                        }
                        otherUser=playerModel.get(index).nickName
                        otherUserType=playerModel.get(index).playerType
+                       otherUserImage=playerModel.get(index).userHeadImage
                        reqPlay(currUser,playerModel.get(index).nickName)
                    }
               }
@@ -1047,10 +1040,84 @@ ApplicationWindow {
    id:gameMain
    anchors.fill: parent
 
-   InfoBar{
-     id:infobar
-     anchors.fill: parent
-   }
+  InfoBar{
+    id:infobar
+    anchors.top:parent.top+10
+    anchors.fill: parent
+  }
+
+  Rectangle{
+      id:sysmenuArea
+      anchors.top: parent.top
+      anchors.topMargin: 55
+      anchors.left:  parent.left
+      anchors.leftMargin:  20
+      width: menuImage.width
+      height: menuImage.height
+      color: "transparent"
+      Image {
+          anchors.margins: 10
+          width: 32
+          height: 32
+          id: menuImage
+          source: "image/menu.png"
+      }
+      MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            console.log("menu click.....")
+            sysmenu.open()
+         }
+      }
+  }
+
+  HelpBox{
+    id:helpBox
+  }
+
+  Menu {
+      id:sysmenu
+      x:sysmenuArea.x+sysmenuArea.width
+      y:sysmenuArea.y
+      MenuItem {
+          text: "游戏规则"
+          onTriggered: {
+            helpBox.open()
+          }
+      }
+
+      MenuItem {
+          text: "问题反馈"
+          onTriggered: {
+            showMsgBox("QQ：999999999")
+          }
+      }
+
+      MenuItem {
+          text: "终止战斗"
+          onTriggered: {
+              gameMain.visible=false
+              signInScreen.visible=false
+              newGame.visible=true
+              gameOver.visible=false
+          }
+      }
+
+      MenuItem {
+          text: "我的信息"
+          onTriggered: {
+
+          }
+      }
+
+      MenuItem {
+          text: "退出系统"
+          onTriggered: {
+            Qt.quit()
+          }
+      }
+    }
+
 
    Image {
        id: coin
@@ -1075,32 +1142,35 @@ ApplicationWindow {
        width: parent.width*0.9
        height: parent.height*0.25
        anchors.top: parent.top
+       anchors.topMargin: 100
        radius: 10
-       anchors.topMargin: 60
        anchors.horizontalCenter: parent.horizontalCenter
        color: "#ddd"
        Row{
            anchors.horizontalCenter: parent.horizontalCenter
-           anchors.top: parent.top
-           anchors.topMargin: 5
-           spacing: 100
+           anchors.top: killarea.top
+           anchors.topMargin: 10
+           width: parent.width
+           height: parent.height*0.4
+
+           spacing: 10
            Rectangle{
                id:play_curruser_area
                color: "transparent"
-               width: 80
-               height: 30
-               Row{
+               width:parent.width*0.4
+               height: currUserLabel.height+5
+               anchors.left: parent.left
+               anchors.leftMargin: 10
+               Column{
+                   id:currUserLabel
                    anchors.centerIn: parent
-                   spacing: 5
                    Image {
                        id:curruser_image
-                       anchors.verticalCenter: parent.verticalCenter
-                       width: 16
-                       height: 16
-                       source: "image/user.png"
-                   }
+                       width: 24
+                       height: 24
+                       source: currUserImage
+                  }
                   Text {
-                     anchors.verticalCenter: parent.verticalCenter
                      id: play_curruser_text
                      font.pixelSize: 16
                      text: qsTr(currUser)
@@ -1111,22 +1181,24 @@ ApplicationWindow {
            Rectangle{
                id:play_otheruser_area
                color: "transparent"
-               width: 80
-               height: 30
-               Row{
-                   spacing: 5
+               width: parent.width*0.4
+               height: otherUserLabel.height+5
+               anchors.right: parent.right
+               anchors.rightMargin: 10
+               Column{
+                   id:otherUserLabel
                    anchors.centerIn: parent
                    Image {
-                       id:otheruser_image
-                        anchors.verticalCenter: parent.verticalCenter
-                       width: 16
-                       height: 16
-                       source: "image/user.png"
+                       id:otherUserImageId
+                       anchors.horizontalCenter: parent.horizontalCenter
+                       width: 24
+                       height: 24
+                       source: otherUserImage
                    }
                    Text {
                      font.pixelSize: 16
-                     anchors.verticalCenter: parent.verticalCenter
                      id: play_otheruser_text
+                     anchors.horizontalCenter: parent.horizontalCenter
                      text: qsTr(otherUser)
                    }
                }
@@ -1135,8 +1207,8 @@ ApplicationWindow {
        //出牌区域
        RowLayout{
            anchors.verticalCenter: parent.verticalCenter
+           anchors.verticalCenterOffset: 30
            anchors.horizontalCenter: parent.horizontalCenter
-           anchors.verticalCenterOffset: 10
            spacing: 80
            GButton {
               id: play_curruser
@@ -1165,7 +1237,7 @@ ApplicationWindow {
          radius: 6
          Column{
              anchors.fill: parent
-             spacing: 5
+             spacing: 1
              Rectangle {
                  width:parent.width
                  height: 30
@@ -1352,7 +1424,7 @@ ApplicationWindow {
         height: parent.height*0.1
         color: "transparent"
         anchors.top: parent.top
-        anchors.topMargin: 260
+        anchors.topMargin: 300
         anchors.horizontalCenter: parent.horizontalCenter
        RowLayout{
             anchors.centerIn:  parent
@@ -1505,7 +1577,6 @@ ApplicationWindow {
         signInScreen.visible=true
         newGame.visible=false
         gameOver.visible=false
-
     }
   }
 
