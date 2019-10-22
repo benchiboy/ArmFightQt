@@ -40,6 +40,7 @@ ApplicationWindow {
     property  int  get_robots: 1080
     property  int  get_robots_resp: 2080
 
+
     property  int  req_play: 1005
     property  int  req_play_resp: 2005
     property  int  req_playyes: 1006
@@ -48,6 +49,10 @@ ApplicationWindow {
     property  int  req_playno_resp: 2010
     property  int  req_giveup: 1007
     property  int  req_giveup_resp: 2007
+
+    property  int  req_draw: 1085
+    property  int  req_draw_resp: 2085
+
 
     property  int  send_voice: 1034
     property  int  send_voice_resp: 2034
@@ -81,20 +86,23 @@ ApplicationWindow {
 
     property  int     otherUserType:2
     property  string  currCard:""
-    property  string  winnerType:""
+    property  string  winnerUser:""
     property  string  currRole:""
     property  int     goldcoins: 0
     property  int     decorations: 0
 
     property  string  nickName:""
     property  string  userPasswd:""
-
-
     property  string  gameWinner:""
     property  string  gameLoster:""
     //property  string  glServerUrl : "http://212.64.29.57:9080/"
-
     property  string  glServerUrl : "http://localhost:9080/"
+    property  string  systemName:"myBoss"
+
+    property  int  playNo :1
+    property  string  batchNo:""
+
+
 
     property  string  messageGreat:"你真棒👍!"
     property  string  messageCommon:"赶快走棋!"
@@ -102,7 +110,7 @@ ApplicationWindow {
     property  var       voiceBomb:  {"waveName":"image/voice_bomb.mp3","waveText":"小心地雷炸弹！"}
     property  var       voiceTooSlow:  {"waveName":"image/voice_tooslow.mp3","waveText":"你太慢了，赶快出棋!"}
     property  string    playVoiceFile:""
-    property  var   command: { "type": 0, "userid": "" }
+    property  var   command: { "type": 0}
 
 
     function playCard(fromId,toId,message,score){
@@ -116,7 +124,11 @@ ApplicationWindow {
         command.fromid=fromId
         command.message=message
         command.toid=toId
+        command.batchno=batchNo
+        command.playno=playNo
         command.score=score
+
+        currCard=message
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -124,8 +136,10 @@ ApplicationWindow {
         console.log("=====>queryResult====>")
         command.type=query_result
         command.fromid=fromId
-        command.message="query result..."
+        command.message="Query Play Result"
         command.toid=toId
+        command.batchno=batchNo
+        command.playno=playNo
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -147,31 +161,36 @@ ApplicationWindow {
         socket.sendTextMessage(JSON.stringify(command))
     }
 
+
+    function getBatchNo(nickName){
+        console.log("=====>getBatchNo====>")
+        console.log("==batchNo===>",(new Date()).getTime())
+        return nickName+"-"+(new Date()).getTime()
+    }
+
+
     function signIn(nickName,password){
         console.log("=====>signIn====>")
         console.log("signUser===>",nickName,password)
-        currUser=nickName
         command.type=sign_in
-        command.userid=Math.random(100)
-        command.nickname=nickName
         command.fromid=nickName
+        command.toid=systemName
         command.message=password
+        console.log(JSON.stringify(command))
         socket.sendTextMessage(JSON.stringify(command))
     }
 
     function initData(id){
         console.log("=====>initData====>")
-        currUser=id
         command.type=init_data
-        command.userid=Math.random(100)
-        command.nickname=id
+        command.fromid=id
+        command.toid=systemName
         command.message="init data..."
         socket.sendTextMessage(JSON.stringify(command))
     }
 
     function initDataResp(initMsg){
        console.log("=====>initDataResp====>")
-       console.log("----->",initMsg)
        gameMain.visible=true
        newGame.visible=false
        gameOver.visible=false
@@ -181,16 +200,18 @@ ApplicationWindow {
        card_gongbing.enabled=true
        card_gongbing.border.color=Qt.darker(activePalette.button)
 
-        card_paizhang.count=initObj.paizhang.count
-         card_paizhang.enabled=true
-         card_paizhang.border.color=Qt.darker(activePalette.button)
+       card_paizhang.count=initObj.paizhang.count
+       card_paizhang.enabled=true
+       card_paizhang.border.color=Qt.darker(activePalette.button)
+
        card_lianzhang.count=initObj.lianzhang.count
-         card_lianzhang.enabled=true
-         card_lianzhang.border.color=Qt.darker(activePalette.button)
+       card_lianzhang.enabled=true
+       card_lianzhang.border.color=Qt.darker(activePalette.button)
        card_yingzhang.count=initObj.yingzhang.count
-         card_yingzhang.enabled=true
-         card_yingzhang.border.color=Qt.darker(activePalette.button)
-       card_tuanzhang.count=initObj.tuanzhang.count
+
+        card_yingzhang.enabled=true
+        card_yingzhang.border.color=Qt.darker(activePalette.button)
+        card_tuanzhang.count=initObj.tuanzhang.count
          card_tuanzhang.enabled=true
          card_tuanzhang.border.color=Qt.darker(activePalette.button)
        card_lvzhang.count=initObj.lvzhang.count
@@ -224,12 +245,16 @@ ApplicationWindow {
     function getUsers(){
         console.log("=====>getUsers====>")
         command.type=get_users
+        command.fromid=currUser
+        command.toid=systemName
         socket.sendTextMessage(JSON.stringify(command))
     }
 
     function getRobots(){
         console.log("=====>getRobots====>")
         command.type=get_robots
+        command.fromid=currUser
+        command.toid=systemName
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -292,17 +317,29 @@ ApplicationWindow {
         socket.sendTextMessage(JSON.stringify(command))
     }
 
+    function sendDraw(fromId,toId){
+        console.log("=====>sendDraw====>")
+        command.type=req_draw
+        command.fromid=fromId
+        command.toid=toId
+        socket.sendTextMessage(JSON.stringify(command))
+    }
+
     function startGame(fromId,toId){
         console.log("=====>startGame====>")
+        playNo=1
         command.type=start_game
         command.fromid=fromId
         command.message="start play a game"
         command.toid=toId
+        batchNo=getBatchNo(fromId)
+        command.batchno=batchNo
         socket.sendTextMessage(JSON.stringify(command))
     }
 
     function showGameOver(){
         console.log("=====>showGameOver====>")
+        batchNo=""
         gameMain.visible=false
         gameOver.visible=true
     }
@@ -363,7 +400,7 @@ ApplicationWindow {
         Component.onCompleted: visible = false
         onYes: {
                 console.log("copied")
-               BusyIndicator.running=true
+                BusyIndicator.running=true
                 reqPlayYes(currUser,otherUser)
                }
         onNo: {
@@ -371,6 +408,7 @@ ApplicationWindow {
                  reqPlayNo(currUser,otherUser)
              }
     }
+
 
     WebSocket {
        id: socket
@@ -403,7 +441,7 @@ ApplicationWindow {
                 case sign_in_resp:
                     console.log("Recv sign_in_resp===>")
                     if (recvMsg.success){
-                        currUser=recvMsg.fromid
+                        currUser=recvMsg.toid
                         console.log("UserImage==>",recvMsg.message)
                         currUserImage=recvMsg.message
                         showNewGame()
@@ -473,6 +511,8 @@ ApplicationWindow {
                     break;
                 case play_card:
                     console.log("Recv play_card===>")
+                    playNo=recvMsg.playno
+                    batchNo=recvMsg.batchno
                     otherUser=recvMsg.fromid
                     if (recvMsg.role=="M"){
                         play_otheruser.opacity=1
@@ -492,7 +532,6 @@ ApplicationWindow {
                     //显示下一步谁出牌
                     play_curruser_area.border.color="transparent"
                     play_otheruser_area.border.color="red"
-
                     if ( recvMsg.role=="M"){
                         play_curruser.opacity=1
                         play_curruser.text=recvMsg.message
@@ -506,21 +545,36 @@ ApplicationWindow {
                         resultTimer.running=true
                     }
                     break;
-
+                case query_result:
+                    console.log("Recv query_resul===>")
+                    play_otheruser.text=recvMsg.message
+                    winnerUser=recvMsg.winner
+                    if (recvMsg.status=="E"){
+                        console.log("game over...")
+                        bgameOver=true
+                    }
+                    clearTimer.running=true
+                    if (currUser!=winnerUser){
+                        gameLoster=currUser
+                        gameWinner=otherUser
+                    }else{
+                        gameLoster=otherUser
+                        gameWinner=currUser
+                    }
+                    break;
                 case query_result_resp:
                     console.log("Recv query_result_resp===>")
+                    playNo=playNo+1
                     console.log(recvMsg.status)
                     if (recvMsg.status=="E"){
                         console.log("game over...")
                         bgameOver=true
                     }
-                    play_otheruser.text=recvMsg.anothermsg
-                    currCard=recvMsg.message
-                    currRole=recvMsg.role
-                    winnerType=recvMsg.winner
+                    console.log(recvMsg.message)
+                    play_otheruser.text=recvMsg.message
+                    winnerUser=recvMsg.winner
                     clearTimer.running=true
-
-                    if (currRole!=winnerType){
+                    if (currUser!=winnerUser){
                         gameLoster=currUser
                         gameWinner=otherUser
                     }else{
@@ -533,7 +587,6 @@ ApplicationWindow {
                     gameWinner=currUser
                     gameLoster=otherUser
                     showGameOver()
-
                     isGameWinner=true
                     break;
                 case req_giveup_resp:
@@ -543,7 +596,13 @@ ApplicationWindow {
                     showGameOver()
                     isGameWinner=false
                     break
-
+                case req_draw:
+                    console.log("Recv req_draw===>")
+                    playconfirm.visible=true
+                    break;
+                case req_draw_resp:
+                    console.log("Recv req_draw_resp===>")
+                    break
                 case change_user:
                     console.log("Recv change_user===>")
                     otherUser=""
@@ -557,6 +616,9 @@ ApplicationWindow {
                     console.log("Recv offline_msg===>")
                     showMsgBox("对方下线了")
                     otherUser=""
+                    break
+                case req_play_card:
+                    console.log("Recv req_play_card===>")
                     break
                 case req_play_card_resp:
                     console.log("Recv req_play_card_resp===>")
@@ -576,8 +638,13 @@ ApplicationWindow {
                         } else if (socket.status == WebSocket.Closed) {
                             socket.active=false
                             console.log("socket closed")
-                        } else{
+                            showMsgBox("网络出现问题")
+                            gameMain.visible=false
+                            signInScreen.visible=true
+                            newGame.visible=false
+                            gameOver.visible=false
 
+                        } else{
                             socket.active=false
                             console.log( socket.errorString)
                         }
@@ -671,11 +738,11 @@ ApplicationWindow {
       interval: 1000; running: false; repeat: true
       onTriggered:{
            console.log("Timer===>"+currUser+"===>clear result...")
-           if (winnerType=="B"){
+           if (winnerUser=="B"){
                showCoinLauch()
            }
 
-          if (winnerType!=currRole){
+          if (winnerUser!=currUser){
                 if (currCard=="工兵"){
                     card_gongbing.count--
                      p1Text.play()
@@ -775,8 +842,6 @@ ApplicationWindow {
           }else{
               showCoinLauch()
           }
-
-          console.log(winnerType,currRole)
           play_curruser.opacity=0
           play_otheruser.opacity=0
           clearTimer.running=false
@@ -784,7 +849,7 @@ ApplicationWindow {
           playcardTimer.running=true
 
           if (bgameOver){
-              if (winnerType!=currRole){
+              if (winnerUser!=currUser){
                  isGameWinner=false
               }else{
                  isGameWinner=true
