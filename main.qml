@@ -95,8 +95,8 @@ ApplicationWindow {
     property  string  userPasswd:""
     property  string  gameWinner:""
     property  string  gameLoster:""
-    //property  string  glServerUrl : "http://212.64.29.57:9080/"
-    property  string  glServerUrl : "http://localhost:9080/"
+    property  string  glServerUrl : "http://212.64.29.57:9080/"
+   // property  string  glServerUrl : "http://localhost:9080/"
     property  string  systemName:"myBoss"
 
     property  int  playNo :1
@@ -339,7 +339,6 @@ ApplicationWindow {
 
     function showGameOver(){
         console.log("=====>showGameOver====>")
-        batchNo=""
         gameMain.visible=false
         gameOver.visible=true
     }
@@ -364,7 +363,6 @@ ApplicationWindow {
     function showCoinLauch(){
         console.log("=====>showCoinLauch====>")
         coinLaunch.start()
-        goldcoins++
         spawnSound.source="image/currency.wav"
         spawnSound.play()
     }
@@ -386,6 +384,8 @@ ApplicationWindow {
         command.fromid=fromId
         command.message=message
         command.toid=toId
+        command.batchno=batchNo
+        command.playno=playNo
         socket.sendTextMessage(JSON.stringify(command))
     }
 
@@ -412,8 +412,8 @@ ApplicationWindow {
 
     WebSocket {
        id: socket
-      // url: "ws://212.64.29.57:9080/echo"
-       url: "ws://127.0.0.1:9080/echo"
+       url: "ws://212.64.29.57:9080/echo"
+      // url: "ws://127.0.0.1:9080/echo"
 
        onTextMessageReceived: {
            //console.log("textMessageRev",message)
@@ -423,11 +423,13 @@ ApplicationWindow {
                     console.log("Recv start_game_resp===>")
                     showGameMain()
                     initData(currUser);
+                    currRole="M"
                     break;
                 case start_game:
                     console.log("Recv start_game===>")
                     showGameMain()
                     initData(currUser);
+                    currRole="S"
                     break;
                 case get_users_resp:
                     console.log("Recv get_users_resp===>")
@@ -443,7 +445,10 @@ ApplicationWindow {
                     if (recvMsg.success){
                         currUser=recvMsg.toid
                         console.log("UserImage==>",recvMsg.message)
-                        currUserImage=recvMsg.message
+                        var  msgObj=JSON.parse(recvMsg.message)
+                        console.log(msgObj)
+                        currUserImage=msgObj.avatar
+                        goldcoins=msgObj.coins
                         showNewGame()
                      }else{
                         showMsgBox(recvMsg.message)
@@ -514,34 +519,26 @@ ApplicationWindow {
                     playNo=recvMsg.playno
                     batchNo=recvMsg.batchno
                     otherUser=recvMsg.fromid
-                    if (recvMsg.role=="M"){
-                        play_otheruser.opacity=1
-                        play_otheruser.text="未知"
-                    }else{
-                        //另一玩家收到牌
-                        play_otheruser.opacity=1
-                        play_otheruser.text="未知"
-                    }
-                     //显示下一步谁出牌
-                     play_otheruser_area.border.color="transparent"
-                     play_curruser_area.border.color="red"
-                     bplay_card=true
+
+                    play_otheruser.opacity=1
+                    play_otheruser.text="未知"
+                    //显示下一步谁出牌
+                    play_otheruser_area.border.color="transparent"
+                    play_curruser_area.border.color="red"
+                    bplay_card=true
                     break;
                 case play_card_resp:
-                    console.log("Recv play_card_resp===>")
+                    console.log("Recv play_card_resp===>",recvMsg.role)
                     //显示下一步谁出牌
                     play_curruser_area.border.color="transparent"
                     play_otheruser_area.border.color="red"
-                    if ( recvMsg.role=="M"){
-                        play_curruser.opacity=1
-                        play_curruser.text=recvMsg.message
+                    play_curruser.opacity=1
+                    play_curruser.text=recvMsg.message
+                    if ( currRole=="M"){
                         if (otherUserType==robot_type){
                             resultTimer.running=true
                         }
                     }else{
-                        play_curruser.opacity=1
-                        play_curruser.text=recvMsg.message
-                        //开始触发从服务器查询大小
                         resultTimer.running=true
                     }
                     break;
@@ -740,6 +737,7 @@ ApplicationWindow {
            console.log("Timer===>"+currUser+"===>clear result...")
            if (winnerUser=="B"){
                showCoinLauch()
+               goldcoins++
            }
 
           if (winnerUser!=currUser){
@@ -841,6 +839,7 @@ ApplicationWindow {
                 }
           }else{
               showCoinLauch()
+              goldcoins=goldcoins+3
           }
           play_curruser.opacity=0
           play_otheruser.opacity=0

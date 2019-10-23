@@ -93,7 +93,7 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: 5
             anchors.right: parent.right
-            anchors.rightMargin: 40
+            anchors.rightMargin: 50
                 Rectangle{
                     width: 32
                     height: 32
